@@ -6,10 +6,10 @@ require 'net/https'
 class Browshot
 	attr_reader :key, :base, :debug
 
-	def initialize(key='', base='https://api.browshot.com/api/v1/', debug=0)
+	def initialize(key='', base='https://api.browshot.com/api/v1/', debug=false)
 		@key = key || ''
 		@base = base || 'http://127.0.0.1:3000/api/v1/'
-		@debug = debug || 0
+		@debug = debug || false
 	end
 
 	def api_version()

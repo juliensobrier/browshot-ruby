@@ -8,6 +8,11 @@ The library version matches closely the API version it handles: browshot 1.0.0 i
 
 browshot can handle most the API updates within the same major version, e.g. browshot 1.0.0 should be compatible with the API 1.1 or 1.2.
 
+== Build and install browshot
+
+    git clone https://github.com/juliensobrier/browshot-ruby
+    rake build
+    rake install
 
 == Contributing to browshot
  
