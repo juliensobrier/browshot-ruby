@@ -12,6 +12,7 @@ browshot can handle most the API updates within the same major version, e.g. bro
 
     git clone https://github.com/juliensobrier/browshot-ruby
     rake build
+    rake test
     rake install
 
 == Contributing to browshot
@@ -28,4 +29,3 @@ browshot can handle most the API updates within the same major version, e.g. bro
 
 Copyright (c) 2011 Julien Sobrier. See LICENSE.txt for
 further details.
-
