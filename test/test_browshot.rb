@@ -128,7 +128,7 @@ class TestBrowshot < Test::Unit::TestCase
 
     should "create a browser" do
 	  # browser is not actually created for test account, so the reply may not match our parameters
-	  browser = @browshot.browser_create({'mobile' => 1, 'flash' => 1, 'user_agent' => 'test'});
+	  browser = @browshot.browser_create({'mobile' => 1, 'flash' => 1, 'user_agent' => 'test'})
 
 	  assert_equal false, browser['name'].nil?,						"Browser name should be present"
 	  assert_equal false, browser['user_agent'].nil?,				"Browser user_agent should be present"
@@ -144,7 +144,7 @@ class TestBrowshot < Test::Unit::TestCase
     end
 
     should "fail to create screenshot" do
-	  screenshot = @browshot.screenshot_create();
+	  screenshot = @browshot.screenshot_create()
 	  assert_equal false, screenshot['error'].nil?,					"Screenshot should have failed"
 
 	  screenshot = @browshot.screenshot_create('-')
@@ -154,7 +154,7 @@ class TestBrowshot < Test::Unit::TestCase
 
     should "create screenshot" do
 	  # screenshot is not actually created for test account, so the reply may not match our parameters
-	  screenshot = @browshot.screenshot_create('http://browshot.com/');
+	  screenshot = @browshot.screenshot_create('http://browshot.com/')
 
 	  assert_equal false, screenshot['id'].nil?, 					"Screenshot ID should be present"
 	  assert_equal false, screenshot['status'].nil?, 				"Screenshot status should be present"
@@ -185,7 +185,7 @@ class TestBrowshot < Test::Unit::TestCase
     end
 
     should "to retrieve a screenshot" do
-	  screenshot = @browshot.screenshot_create('http://browshot.com/');
+	  screenshot = @browshot.screenshot_create('http://browshot.com/')
       info  = @browshot.screenshot_info(screenshot['id'])
 
 	  assert_equal false, info['id'].nil?,							"Screenshot ID should be present"
@@ -212,7 +212,7 @@ class TestBrowshot < Test::Unit::TestCase
     end
 
     should "retrieve the list of screenshots" do
-	  screenshots = @browshot.screenshot_list();
+	  screenshots = @browshot.screenshot_list()
 	  assert_equal true, screenshots.length > 0,					"There should be multiple screenshots"
 
       screenshot_id = 0
@@ -221,7 +221,7 @@ class TestBrowshot < Test::Unit::TestCase
 		break
 	  end
 
-	  assert_equal true, screenshot_id.to_i > 0,					"Screesnot ID should be positive"
+	  assert_equal true, screenshot_id.to_i > 0,					"Screenshot ID should be positive"
       screenshot = screenshots[screenshot_id]
 
 	  assert_equal false, screenshot['id'].nil?,					"Screenshot ID should be present"
@@ -247,7 +247,7 @@ class TestBrowshot < Test::Unit::TestCase
 	  end
 	end
 
-    should "retrieve a thrumbnail" do
+    should "retrieve a thumbnail" do
 	  # TODO
 	end
 
