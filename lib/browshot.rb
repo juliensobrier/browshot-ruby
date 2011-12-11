@@ -34,7 +34,7 @@ class Browshot
 
 	# Return the API version handled by the library. Note that this library can usually handle new arguments in requests without requiring an update.
 	def api_version()
-		return "1.2"
+		return "1.3"
 	end
 
 	# Return the list of instances. See http://browshot.com/api/documentation#instance_list for the response format.

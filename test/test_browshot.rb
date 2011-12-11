@@ -14,7 +14,7 @@ class TestBrowshot < Test::Unit::TestCase
     end
 
     should "get the API version" do
-      assert_equal '1.2', @browshot.api_version()
+      assert_equal '1.3', @browshot.api_version()
     end
 
     should "get the list of instances available" do
@@ -176,6 +176,7 @@ class TestBrowshot < Test::Unit::TestCase
 	  	assert_equal false, screenshot['final_url'].nil?, 			"Screenshot final_url should be present"
 	  	assert_equal false, screenshot['content_type'].nil?, 		"Screenshot content_type should be present"
 	  	assert_equal false, screenshot['scale'].nil?, 				"Screenshot scale should be present"
+		assert_equal false, screenshot['cost'].nil?, 				"Screenshot cost should be present"
 	  end
     end
 
@@ -191,6 +192,7 @@ class TestBrowshot < Test::Unit::TestCase
 	  assert_equal false, info['id'].nil?,							"Screenshot ID should be present"
 	  assert_equal false, info['status'].nil?,						"Screenshot status should be present"
 	  assert_equal false, info['priority'].nil?,					"Screenshot priority should be present"
+	  assert_equal false, info['cost'].nil?,						"Screenshot cost should be present"
 
 	  if (info['status'] == 'finished')
 	  	assert_equal false, info['screenshot_url'].nil?, 			"Screenshot screenshot_url should be present"
@@ -227,6 +229,7 @@ class TestBrowshot < Test::Unit::TestCase
 	  assert_equal false, screenshot['id'].nil?,					"Screenshot ID should be present"
 	  assert_equal false, screenshot['status'].nil?,				"Screenshot status should be present"
 	  assert_equal false, screenshot['priority'].nil?,				"Screenshot priority should be present"
+	  assert_equal false, screenshot['cost'].nil?,					"Screenshot cost should be present"
 
 	  if (screenshot['status'] == 'finished')
 	  	assert_equal false, screenshot['screenshot_url'].nil?, 		"Screenshot screenshot_url should be present"
@@ -254,9 +257,9 @@ class TestBrowshot < Test::Unit::TestCase
     should "retrieve account information" do
 	  account = @browshot.account_info()
 	  assert_equal false, account['balance'].nil?, 					"Account balance should be present"
-	  assert_equal 0,     account['balance'].to_i, 						"Balance should be empty"
+	  assert_equal 0,     account['balance'].to_i, 					"Balance should be empty"
 	  assert_equal false, account['active'].nil?, 					"Account active should be present"
-	  assert_equal 1,     account['active'].to_i, 						"Accountshould be active"
+	  assert_equal 1,     account['active'].to_i, 					"Accountshould be active"
 	  assert_equal false, account['instances'].nil?, 				"Account instances should be present"
 	end
 
