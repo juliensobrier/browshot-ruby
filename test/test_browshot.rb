@@ -14,7 +14,19 @@ class TestBrowshot < Test::Unit::TestCase
     end
 
     should "get the API version" do
-      assert_equal '1.3', @browshot.api_version()
+      assert_equal '1.4', @browshot.api_version()
+    end
+
+    should "get a screenshot with the simple method" do
+        data = @browshot.simple({'url' => 'http://mobilito.net/', 'cache' => 60 * 60 * 24 * 365})
+        assert_equal 200, data[:code].to_i,                     "Screenshot should be succesful"
+        assert_equal true, data[:png].length > 0,               "Screenshot should be sent"
+    end
+
+     should "get an error with the simple method" do
+        data = @browshot.simple({'url' => 'http://', 'cache' => 60 * 60 * 24 * 365})
+        assert_equal 400, data[:code].to_i,                     "Screenshot should have failed"
+        assert_equal 0, data[:png].length,                      "Screenshot should not be sent"
     end
 
     should "get the list of instances available" do

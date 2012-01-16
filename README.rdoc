@@ -33,5 +33,5 @@ Or
 
 == Copyright
 
-Copyright (c) 2011 Julien Sobrier. See LICENSE.txt for
+Copyright (c) 2012 Julien Sobrier. See LICENSE.txt for
 further details.

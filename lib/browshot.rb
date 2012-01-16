@@ -5,7 +5,7 @@
 # and this library.
 #
 # Author::    Julien Sobrier  (mailto:jsobrier@browshot.com)
-# Copyright:: Copyright (c) 2011 Browshot
+# Copyright:: Copyright (c) 2012 Browshot
 # License::   Distributes under the same terms as Ruby
 
 require 'url'
@@ -34,8 +34,42 @@ class Browshot
 
 	# Return the API version handled by the library. Note that this library can usually handle new arguments in requests without requiring an update.
 	def api_version()
-		return "1.3"
+		return "1.4"
 	end
+
+    # Retrieve a screenshot with one call. See http://browshot.com/api/documentation#simple for the full list of possible arguments.
+    #
+    # Return {: code => 200, :png => <content>} in case of success
+    def simple(parameters={})
+        begin
+            url = make_url('simple', parameters)
+            response = fetch(url.to_s)
+            case response
+                when Net::HTTPSuccess     then 
+                    return {:code => response.code, :png => response.response.body}
+                else
+                    return {:code => response.code, :png => ''}
+            end
+        rescue Exception => e
+            puts "{e.message}" if (@debug)
+            raise e
+        end
+    end
+
+    # Save a screenshot to a file with one call, and save it to a file. See http://browshot.com/api/documentation#simple for the full list of possible arguments.
+    #
+    # Return {: code => 200, :file => <file_name>} in case of success
+    #
+    # +file+:  Local file name to write to.
+    def simple_file(file='', parameters={})
+        data = self.simple(parameters)
+        if (data[:png].length > 0)
+            File.open(file, 'w') {|f| f.write(data[:png]) }
+            return {:code => data[:code], :file => file}
+        else
+            return {:code => data[:code], :file => ''}
+        end
+    end
 
 	# Return the list of instances. See http://browshot.com/api/documentation#instance_list for the response format.
 	def instance_list()
@@ -176,4 +210,29 @@ class Browshot
 			raise e
 		end
 	end
+
+    def fetch(url, limit=32)
+        raise ArgumentError, 'HTTP redirect too deep' if (limit == 0)
+
+        uri = URI.parse(url)
+        http = Net::HTTP.new(uri.host, uri.port)
+        http.open_timeout = 240
+        http.read_timeout = 240
+
+        request = Net::HTTP::Get.new(uri.request_uri)
+        if (uri.scheme == 'https')
+            http.use_ssl = true
+            http.verify_mode = OpenSSL::SSL::VERIFY_NONE
+        end
+        response = http.request(request)
+
+        case response
+            when Net::HTTPRedirection then 
+                path = response['location']
+                url = URL.new( URI.join(@base, path).to_s )
+                return fetch(url.to_s, limit - 1)
+            else
+                return response
+        end
+    end
 end
