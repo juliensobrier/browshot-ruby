@@ -22,7 +22,7 @@ class Browshot
 	attr_reader :debug
 
 	# New client
-	# 
+	#
 	# +key+:: API key
 	# +base+:: Base URL for all API requests. You should use the default base provided by the library. Be careful if you decide to use HTTP instead of HTTPS as your API key could be sniffed and your account could be used without your consent.
 	# +debug+:: Set to true to print debug output to the standard output. false (disabled) by default.
@@ -34,12 +34,12 @@ class Browshot
 
 	# Return the API version handled by the library. Note that this library can usually handle new arguments in requests without requiring an update.
 	def api_version()
-		return "1.4"
+		return "1.5"
 	end
 
     # Retrieve a screenshot with one call. See http://browshot.com/api/documentation#simple for the full list of possible arguments.
     #
-    # Return {: code => 200, :png => <content>} in case of success
+    # Return {:code => 200, :png => <content>} in case of success
     def simple(parameters={})
         begin
             url = make_url('simple', parameters)
@@ -58,9 +58,9 @@ class Browshot
 
     # Save a screenshot to a file with one call, and save it to a file. See http://browshot.com/api/documentation#simple for the full list of possible arguments.
     #
-    # Return {: code => 200, :file => <file_name>} in case of success
+    # Return {:code => 200, :file => <file_name>} in case of success
     #
-    # +file+:  Local file name to write to.
+    # +file+::  Local file name to write to.
     def simple_file(file='', parameters={})
         data = self.simple(parameters)
         if (data[:png].length > 0)
@@ -159,7 +159,7 @@ class Browshot
 	# See http://browshot.com/api/documentation#thumbnails for the full list of possible arguments.
 	# 
 	# +url+:: URL of the screenshot (screenshot_url value retrieved from screenshot_create() or screenshot_info()). You will get the full image if no other argument is specified.
-	# +file+:  Local file name to write to.
+	# +file+::  Local file name to write to.
 	def screenshot_thumbnail_file(url='', file='', parameters={})
 		content = screenshot_thumbnail(url, parameters);
 
