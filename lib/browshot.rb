@@ -34,7 +34,7 @@ class Browshot
 
 	# Return the API version handled by the library. Note that this library can usually handle new arguments in requests without requiring an update.
 	def api_version()
-		return "1.6"
+		return "1.7"
 	end
 
     # Retrieve a screenshot with one call. See http://browshot.com/api/documentation#simple for the full list of possible arguments.
@@ -116,8 +116,9 @@ class Browshot
 	# Get information about a screenshot requested previously. See http://browshot.com/api/documentation#screenshot_info for the response format.
 	#
 	# +id+:: screenshot ID
-	def screenshot_info(id=0)
-		return return_reply('screenshot/info', { 'id' => id })
+	def screenshot_info(id=0, parameters={})
+		parameters[:id] = id
+		return return_reply('screenshot/info', parameters)
 	end
 
 	# Get details about screenshots requested. See http://browshot.com/api/documentation#screenshot_list for the response format.

@@ -14,7 +14,7 @@ class TestBrowshot < Test::Unit::TestCase
     end
 
     should "get the API version" do
-      assert_equal '1.6', @browshot.api_version()
+      assert_equal '1.7', @browshot.api_version()
     end
 
     should "get a screenshot with the simple method" do
@@ -56,8 +56,6 @@ class TestBrowshot < Test::Unit::TestCase
 	  assert_equal false, free['browser']['flash'].nil?,		"Missing instance browser flash capability"
 	  assert_equal false, free['browser']['mobile'].nil?,		"Missing instance browser mobile capability"
 	  assert_equal false, free['type'].nil?,					"Missing instance type"
-	  assert_equal false, free['active'].nil?,					"Missing instance active"
-	  assert_equal 1,     free['active'].to_i,					"Free instance should be active"
 	  assert_equal false, free['screenshot_cost'].nil?,			"Missing instance cost"
 	  assert_equal 0,     free['screenshot_cost'].to_i,			"Cost should be 0"
     end
@@ -77,7 +75,6 @@ class TestBrowshot < Test::Unit::TestCase
 	  assert_equal free['browser']['flash'], instance['browser']['flash'],			"Mismatch instance browser flash capability"
 	  assert_equal free['browser']['mobile'], instance['browser']['mobile'],		"Mismatch instance browser mobile capability"
 	  assert_equal free['type'], instance['type'],									"Mismatch instance type"
-	  assert_equal free['active'], instance['active'],								"Mismatch instance active"
 	  assert_equal free['screenshot_cost'], instance['screenshot_cost'],			"Mismatch instance cost"
     end
 
@@ -99,17 +96,17 @@ class TestBrowshot < Test::Unit::TestCase
  	  assert_equal false, instance['error'].nil?,					"Instance browser ID should be invalid"
     end
 
-    should "create a new instance (sort of)" do
-# 	  Instance is not actually created for test account, so the reply may not match our parameters
+    should "create a new instance" do
+# 	  Option disabled for most accounts
 	  instance = @browshot.instance_create()
 
-	  assert_equal false, instance['id'].nil?,						"Instance ID should be present"
-	  assert_equal false, instance['width'].nil?,					"Instance screen width should be present"
-	  assert_equal false, instance['height'].nil?,					"Instance screen height should be present"
-	  assert_equal false, instance['active'].nil?,					"Instance active should be present"
-	  assert_equal 1, 	  instance['active'].to_i,					"Instance should be active"
-	  assert_equal false, instance['browser'].nil?,					"Instance browser should be present"
-	  assert_equal false, instance['browser']['id'].nil?,			"Instance browser ID should be present"
+# 	  assert_equal false, instance['error'].nil?,					"Instance cannot be created for this account"
+# 	  assert_equal false, instance['id'].nil?,						"Instance ID should be present"
+# 	  assert_equal false, instance['width'].nil?,					"Instance screen width should be present"
+# 	  assert_equal false, instance['height'].nil?,					"Instance screen height should be present"
+# 	  assert_equal 1, 	  instance['active'].to_i,					"Instance should be active"
+# 	  assert_equal false, instance['browser'].nil?,					"Instance browser should be present"
+# 	  assert_equal false, instance['browser']['id'].nil?,			"Instance browser ID should be present"
     end
 
     should "get the list of browsers" do
@@ -122,7 +119,7 @@ class TestBrowshot < Test::Unit::TestCase
 		break
 	  end
 
-	  assert_equal true, browser_id.to_i > 0,							"Browser ID should be positive"
+	  assert_equal true, browser_id.to_i > 0,						"Browser ID should be positive"
       browser = browsers[browser_id]
 
 	  assert_equal false, browser['name'].nil?,						"Browser name should be present"
@@ -139,20 +136,21 @@ class TestBrowshot < Test::Unit::TestCase
     end
 
     should "create a browser" do
-	  # browser is not actually created for test account, so the reply may not match our parameters
+	  # Option disabled for most accounts
 	  browser = @browshot.browser_create({'mobile' => 1, 'flash' => 1, 'user_agent' => 'test'})
 
-	  assert_equal false, browser['name'].nil?,						"Browser name should be present"
-	  assert_equal false, browser['user_agent'].nil?,				"Browser user_agent should be present"
-	  assert_equal false, browser['appname'].nil?,					"Browser appname should be present"
-	  assert_equal false, browser['vendorsub'].nil?,				"Browser vendorsub should be present"
-	  assert_equal false, browser['appcodename'].nil?,				"Browser appcodename should be present"
-	  assert_equal false, browser['platform'].nil?,					"Browser platform should be present"
-	  assert_equal false, browser['vendor'].nil?,					"Browser vendor should be present"
-	  assert_equal false, browser['appversion'].nil?,				"Browser appversion should be present"
-	  assert_equal false, browser['javascript'].nil?,				"Browser javascript capability should be present"
-	  assert_equal false, browser['mobile'].nil?,					"Browser mobile capability should be present"
-	  assert_equal false, browser['flash'].nil?,					"Browser flash capability should be present"
+# 	  assert_equal false, browser['error'].nil?,					"Browser cannot be created for this account"
+# 	  assert_equal false, browser['name'].nil?,						"Browser name should be present"
+# 	  assert_equal false, browser['user_agent'].nil?,				"Browser user_agent should be present"
+# 	  assert_equal false, browser['appname'].nil?,					"Browser appname should be present"
+# 	  assert_equal false, browser['vendorsub'].nil?,				"Browser vendorsub should be present"
+# 	  assert_equal false, browser['appcodename'].nil?,				"Browser appcodename should be present"
+# 	  assert_equal false, browser['platform'].nil?,					"Browser platform should be present"
+# 	  assert_equal false, browser['vendor'].nil?,					"Browser vendor should be present"
+# 	  assert_equal false, browser['appversion'].nil?,				"Browser appversion should be present"
+# 	  assert_equal false, browser['javascript'].nil?,				"Browser javascript capability should be present"
+# 	  assert_equal false, browser['mobile'].nil?,					"Browser mobile capability should be present"
+# 	  assert_equal false, browser['flash'].nil?,					"Browser flash capability should be present"
     end
 
     should "fail to create screenshot" do
@@ -197,7 +195,7 @@ class TestBrowshot < Test::Unit::TestCase
 	  assert_equal false, screenshot['error'].nil?,					"Screenshot should have failed"
     end
 
-    should "to retrieve a screenshot" do
+    should "retrieve a screenshot" do
 	  screenshot = @browshot.screenshot_create('http://browshot.com/')
       info  = @browshot.screenshot_info(screenshot['id'])
 
@@ -222,6 +220,138 @@ class TestBrowshot < Test::Unit::TestCase
 	  	assert_equal false, info['final_url'].nil?, 				"Screenshot final_url should be present"
 	  	assert_equal false, info['content_type'].nil?, 				"Screenshot content_type should be present"
 	  	assert_equal false, info['scale'].nil?, 					"Screenshot scale should be present"
+	  end
+    end
+
+	should "to retrieve a screenshot with details==0" do
+	  screenshot = @browshot.screenshot_create('http://browshot.com/')
+      info  = @browshot.screenshot_info(screenshot['id'], { 'details' => 0 })
+
+	  assert_equal false, info['id'].nil?,							"Screenshot ID should be present"
+	  assert_equal false, info['status'].nil?,						"Screenshot status should be present"
+	  assert_equal false, info['priority'].nil?,					"Screenshot priority should be present"
+	  assert_equal false, info['cost'].nil?,						"Screenshot cost should be present"
+
+	  if (info['status'] == 'finished')
+	  	assert_equal false, info['screenshot_url'].nil?, 			"Screenshot screenshot_url should be present"
+	  	assert_equal false, info['url'].nil?, 						"Screenshot url should be present"
+	  	assert_equal false, info['size'].nil?, 						"Screenshot size should be present"
+	  	assert_equal false, info['width'].nil?, 					"Screenshot width should be present"
+	  	assert_equal false, info['height'].nil?, 					"Screenshot height should be present"
+	  	assert_equal false, info['instance_id'].nil?, 				"Screenshot instance_id should be present"
+	  	assert_equal false, info['final_url'].nil?, 				"Screenshot final_url should be present"
+	  	assert_equal false, info['scale'].nil?, 					"Screenshot scale should be present"
+
+	  	assert_equal true, info['response_code'].nil?, 				"Screenshot response_code should NOT be present"
+	  	assert_equal true, info['content_type'].nil?, 				"Screenshot content_type should NOT be present"
+
+	  	assert_equal true, info['started'].nil?, 					"Screenshot started should NOT be present"
+	  	assert_equal true, info['finished'].nil?, 					"Screenshot finished should NOT be present"
+	  	assert_equal true, info['load'].nil?, 						"Screenshot load should NOT be present"
+	  	assert_equal true, info['request_time'].nil?, 				"Screenshot request_time should NOT be present"
+	  	assert_equal true, info['content'].nil?, 					"Screenshot content should NOT be present"
+
+		assert_equal true, info['images'].nil?, 					"Screenshot images should NOT be present"
+	  end
+    end
+
+	should "to retrieve a screenshot with details==1" do
+	  screenshot = @browshot.screenshot_create('http://browshot.com/')
+      info  = @browshot.screenshot_info(screenshot['id'], { 'details' => 1 })
+
+	  assert_equal false, info['id'].nil?,							"Screenshot ID should be present"
+	  assert_equal false, info['status'].nil?,						"Screenshot status should be present"
+	  assert_equal false, info['priority'].nil?,					"Screenshot priority should be present"
+	  assert_equal false, info['cost'].nil?,						"Screenshot cost should be present"
+
+	  if (info['status'] == 'finished')
+	  	assert_equal false, info['screenshot_url'].nil?, 			"Screenshot screenshot_url should be present"
+	  	assert_equal false, info['url'].nil?, 						"Screenshot url should be present"
+	  	assert_equal false, info['size'].nil?, 						"Screenshot size should be present"
+	  	assert_equal false, info['width'].nil?, 					"Screenshot width should be present"
+	  	assert_equal false, info['height'].nil?, 					"Screenshot height should be present"
+	  	assert_equal false, info['instance_id'].nil?, 				"Screenshot instance_id should be present"
+	  	assert_equal false, info['final_url'].nil?, 				"Screenshot final_url should be present"
+	  	assert_equal false, info['scale'].nil?, 					"Screenshot scale should be present"
+
+	  	assert_equal false, info['response_code'].nil?, 			"Screenshot response_code should be present"
+	  	assert_equal false, info['content_type'].nil?, 				"Screenshot content_type should be present"
+
+	  	assert_equal true, info['started'].nil?, 					"Screenshot started should NOT be present"
+	  	assert_equal true, info['finished'].nil?, 					"Screenshot finished should NOT be present"
+	  	assert_equal true, info['load'].nil?, 						"Screenshot load should NOT be present"
+	  	assert_equal true, info['request_time'].nil?, 				"Screenshot request_time should NOT be present"
+	  	assert_equal true, info['content'].nil?, 					"Screenshot content should NOT be present"
+
+		assert_equal true, info['images'].nil?, 					"Screenshot images should NOT be present"
+	  end
+    end
+
+	should "to retrieve a screenshot with details==2" do
+	  screenshot = @browshot.screenshot_create('http://browshot.com/')
+      info  = @browshot.screenshot_info(screenshot['id'], { 'details' => 2 })
+
+	  assert_equal false, info['id'].nil?,							"Screenshot ID should be present"
+	  assert_equal false, info['status'].nil?,						"Screenshot status should be present"
+	  assert_equal false, info['priority'].nil?,					"Screenshot priority should be present"
+	  assert_equal false, info['cost'].nil?,						"Screenshot cost should be present"
+
+	  if (info['status'] == 'finished')
+	  	assert_equal false, info['screenshot_url'].nil?, 			"Screenshot screenshot_url should be present"
+	  	assert_equal false, info['url'].nil?, 						"Screenshot url should be present"
+	  	assert_equal false, info['size'].nil?, 						"Screenshot size should be present"
+	  	assert_equal false, info['width'].nil?, 					"Screenshot width should be present"
+	  	assert_equal false, info['height'].nil?, 					"Screenshot height should be present"
+	  	assert_equal false, info['instance_id'].nil?, 				"Screenshot instance_id should be present"
+	  	assert_equal false, info['final_url'].nil?, 				"Screenshot final_url should be present"
+	  	assert_equal false, info['scale'].nil?, 					"Screenshot scale should be present"
+
+	  	assert_equal false, info['response_code'].nil?, 			"Screenshot response_code should be present"
+	  	assert_equal false, info['content_type'].nil?, 				"Screenshot content_type should be present"
+
+	  	assert_equal false, info['started'].nil?, 					"Screenshot started should be present"
+	  	assert_equal false, info['finished'].nil?, 					"Screenshot finished should be present"
+	  	assert_equal false, info['load'].nil?, 						"Screenshot load should be present"
+	  	assert_equal false, info['request_time'].nil?, 				"Screenshot request_time should be present"
+	  	assert_equal false, info['content'].nil?, 					"Screenshot content should be present"
+
+		assert_equal true, info['images'].nil?, 					"Screenshot images should NOT be present"
+	  end
+    end
+
+	should "to retrieve a screenshot with details==3" do
+	  screenshot = @browshot.screenshot_create('http://browshot.com/')
+      info  = @browshot.screenshot_info(screenshot['id'], { 'details' => 3 })
+
+	  assert_equal false, info['id'].nil?,							"Screenshot ID should be present"
+	  assert_equal false, info['status'].nil?,						"Screenshot status should be present"
+	  assert_equal false, info['priority'].nil?,					"Screenshot priority should be present"
+	  assert_equal false, info['cost'].nil?,						"Screenshot cost should be present"
+
+	  if (info['status'] == 'finished')
+	  	assert_equal false, info['screenshot_url'].nil?, 			"Screenshot screenshot_url should be present"
+	  	assert_equal false, info['url'].nil?, 						"Screenshot url should be present"
+	  	assert_equal false, info['size'].nil?, 						"Screenshot size should be present"
+	  	assert_equal false, info['width'].nil?, 					"Screenshot width should be present"
+	  	assert_equal false, info['height'].nil?, 					"Screenshot height should be present"
+	  	assert_equal false, info['instance_id'].nil?, 				"Screenshot instance_id should be present"
+	  	assert_equal false, info['final_url'].nil?, 				"Screenshot final_url should be present"
+	  	assert_equal false, info['scale'].nil?, 					"Screenshot scale should be present"
+
+	  	assert_equal false, info['response_code'].nil?, 			"Screenshot response_code should be present"
+	  	assert_equal false, info['content_type'].nil?, 				"Screenshot content_type should be present"
+
+	  	assert_equal false, info['started'].nil?, 					"Screenshot started should be present"
+	  	assert_equal false, info['finished'].nil?, 					"Screenshot finished should be present"
+	  	assert_equal false, info['load'].nil?, 						"Screenshot load should be present"
+	  	assert_equal false, info['request_time'].nil?, 				"Screenshot request_time should be present"
+	  	assert_equal false, info['content'].nil?, 					"Screenshot content should be present"
+
+		assert_equal false, info['images'].nil?, 					"Screenshot images should be present"
+		assert_equal true, info['images'].length > 0, 				"Screenshot images should be present"
+		assert_equal false, info['scripts'].nil?, 					"Screenshot scripts should be present"
+		assert_equal false, info['iframes'].nil?, 					"Screenshot iframes should be present"
+		assert_equal false, info['embeds'].nil?, 					"Screenshot embeds should be present"
 	  end
     end
 
