@@ -34,7 +34,7 @@ class Browshot
 
 	# Return the API version handled by the library. Note that this library can usually handle new arguments in requests without requiring an update.
 	def api_version()
-		return "1.7"
+		return "1.8"
 	end
 
     # Retrieve a screenshot with one call. See http://browshot.com/api/documentation#simple for the full list of possible arguments.
@@ -126,45 +126,49 @@ class Browshot
 		return return_reply('screenshot/list', parameters)
 	end
 
-	# Retrieve the screenshot, or a thumbnail. See http://browshot.com/api/documentation#thumbnails for the response format.
+	# Retrieve the screenshot, or a thumbnail. See http://browshot.com/api/documentation#screenshot_thumbnails for the response format.
 	#
 	# Return an empty string if the image could not be retrieved.
 	# +id+:: screenshot ID
-	def screenshot_thumbnail(url='', parameters={})
+	def screenshot_thumbnail(id=0, parameters={})
+		parameters[:id] = id
+
 		begin
-			url =  URL.new(url)
-
-			parameters.each_pair do |key, value|
-				url.params[key] = value
-			end
-			
-			puts "#{url}" if (@debug)
-
-
-			response = url.get
-
-			if (response.success?)
-				return response.response.body
-			else
-				puts "Error from #{url}: #{response.code}" if (@debug)
-				return ''
-			end
-		rescue Exception => e
-			puts "{e.message}" if (@debug)
-			raise e
-		end
+            url = make_url('screenshot/thumbnail', parameters)
+            response = fetch(url.to_s)
+            case response
+                when Net::HTTPSuccess     then 
+                    return response.response.body
+                else
+                    return ''
+            end
+        rescue Exception => e
+            puts "{e.message}" if (@debug)
+            raise e
+        end
 	end
 
-	# Retrieve the screenshot, or a thumbnail, and save it to a file. See http://browshot.com/api/documentation#thumbnails for the response format.
+	# Hot a screenshot or thumbnail. See http://browshot.com/api/documentation#screenshot_host for the response format.
+	#
+	# +id+:: screenshot ID
+	# +hosting+:: hosting option: s3, cdn or browshot
+	def screenshot_host(id=0, hosting='browshot', parameters={})
+		parameters[:id] = id
+		parameters[:hosting] = hosting
+		return return_reply('screenshot/host', parameters)
+	end
+
+
+	# Retrieve the screenshot, or a thumbnail, and save it to a file. See http://browshot.com/api/documentation#screenshot_thumbnails for the response format.
 	#
 	# See http://browshot.com/api/documentation#thumbnails for the full list of possible arguments.
 	# 
-	# +url+:: URL of the screenshot (screenshot_url value retrieved from screenshot_create() or screenshot_info()). You will get the full image if no other argument is specified.
+	# +id+:: screenshot ID
 	# +file+::  Local file name to write to.
-	def screenshot_thumbnail_file(url='', file='', parameters={})
-		content = screenshot_thumbnail(url, parameters);
+	def screenshot_thumbnail_file(id=0, file='', parameters={})
+		content = screenshot_thumbnail(id, parameters);
 
-		if ($content != '')
+		if (content != '')
 			File.open(file, 'w') {|f| f.write(content) }
 			return file
 		else

@@ -14,7 +14,7 @@ class TestBrowshot < Test::Unit::TestCase
     end
 
     should "get the API version" do
-      assert_equal '1.7', @browshot.api_version()
+      assert_equal '1.8', @browshot.api_version()
     end
 
     should "get a screenshot with the simple method" do
@@ -85,7 +85,7 @@ class TestBrowshot < Test::Unit::TestCase
  	  assert_equal false, instance['status'].nil?,					"Instance should not be found"
     end
 
-    should "send an errror when creating a instanc with ivalid arguments" do
+    should "send an errror when creating a instance with ivalid arguments" do
 	  instance = @browshot.instance_create({'width' => 3000})
  	  assert_equal false, instance['error'].nil?,					"Instance width should be too large"
 
@@ -100,7 +100,7 @@ class TestBrowshot < Test::Unit::TestCase
 # 	  Option disabled for most accounts
 	  instance = @browshot.instance_create()
 
-# 	  assert_equal false, instance['error'].nil?,					"Instance cannot be created for this account"
+	  assert_equal false, instance['error'].nil?,					"Instance cannot be created for this account"
 # 	  assert_equal false, instance['id'].nil?,						"Instance ID should be present"
 # 	  assert_equal false, instance['width'].nil?,					"Instance screen width should be present"
 # 	  assert_equal false, instance['height'].nil?,					"Instance screen height should be present"
@@ -139,7 +139,7 @@ class TestBrowshot < Test::Unit::TestCase
 	  # Option disabled for most accounts
 	  browser = @browshot.browser_create({'mobile' => 1, 'flash' => 1, 'user_agent' => 'test'})
 
-# 	  assert_equal false, browser['error'].nil?,					"Browser cannot be created for this account"
+	  assert_equal false, browser['error'].nil?,					"Browser cannot be created for this account"
 # 	  assert_equal false, browser['name'].nil?,						"Browser name should be present"
 # 	  assert_equal false, browser['user_agent'].nil?,				"Browser user_agent should be present"
 # 	  assert_equal false, browser['appname'].nil?,					"Browser appname should be present"
@@ -393,7 +393,47 @@ class TestBrowshot < Test::Unit::TestCase
 	end
 
     should "retrieve a thumbnail" do
-	  # TODO
+	  screenshots = @browshot.screenshot_list()
+	  assert_equal true, screenshots.length > 0,					"There should be multiple screenshots"
+
+      screenshot_id = 0
+	  screenshots.each do |key, screenshot|
+		screenshot_id = key
+		break
+	  end
+
+	  assert_equal true, screenshot_id.to_i > 0,					"Screenshot ID should be positive"
+
+	  thumbnail = @browshot.screenshot_thumbnail(screenshot_id, { 'width' => 480 });
+	  assert_equal 'PNG', thumbnail[1..3],							"Thumbnail is a valid PNG"
+	end
+
+	should "Fail hosting screenshots" do
+	  screenshots = @browshot.screenshot_list()
+	  assert_equal true, screenshots.length > 0,					"There should be multiple screenshots"
+
+      screenshot_id = 0
+	  screenshots.each do |key, screenshot|
+		screenshot_id = key
+		break
+	  end
+
+	  assert_equal true, screenshot_id.to_i > 0,					"Screenshot ID should be positive"
+
+	  hosting = @browshot.screenshot_host(screenshot_id)
+	  assert_equal 'error', hosting['status'],						"Default hosting option not enabled for this account"
+
+	  hosting = @browshot.screenshot_host(screenshot_id, { 'hosting' => 's3' })
+	  assert_equal 'error', hosting['status'],						"S3 hosting option not enabled for this account"
+
+	  hosting = @browshot.screenshot_host(screenshot_id, { 'hosting' => 's3', 'bucket' => 'mine' })
+	  assert_equal 'error', hosting['status'],						"S3 hosting option not enabled for this account"
+
+	  hosting = @browshot.screenshot_host(screenshot_id, { 'hosting' => 'cdn' })
+	  assert_equal 'error', hosting['status'],						"CDN hosting option not enabled for this account"
+
+	  hosting = @browshot.screenshot_host(screenshot_id, { 'hosting' => 'browshot' })
+	  assert_equal 'error', hosting['status'],						"Browshot hosting option not enabled for this account"
 	end
 
     should "retrieve account information" do
