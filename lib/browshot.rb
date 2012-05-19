@@ -34,7 +34,7 @@ class Browshot
 
 	# Return the API version handled by the library. Note that this library can usually handle new arguments in requests without requiring an update.
 	def api_version()
-		return "1.8"
+		return "1.9"
 	end
 
     # Retrieve a screenshot with one call. See http://browshot.com/api/documentation#simple for the full list of possible arguments.
@@ -156,6 +156,14 @@ class Browshot
 		parameters[:id] = id
 		parameters[:hosting] = hosting
 		return return_reply('screenshot/host', parameters)
+	end
+
+	# Share a screenshot. See http://browshot.com/api/documentation#screenshot_share for the response format.
+	#
+	# +id+:: screenshot ID
+	def screenshot_share(id=0, parameters={})
+		parameters[:id] = id
+		return return_reply('screenshot/share', parameters)
 	end
 
 

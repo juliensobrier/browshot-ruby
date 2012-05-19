@@ -14,7 +14,7 @@ class TestBrowshot < Test::Unit::TestCase
     end
 
     should "get the API version" do
-      assert_equal '1.8', @browshot.api_version()
+      assert_equal '1.9', @browshot.api_version()
     end
 
     should "get a screenshot with the simple method" do
@@ -434,6 +434,11 @@ class TestBrowshot < Test::Unit::TestCase
 
 	  hosting = @browshot.screenshot_host(screenshot_id, { 'hosting' => 'browshot' })
 	  assert_equal 'error', hosting['status'],						"Browshot hosting option not enabled for this account"
+	end
+
+	should "Fail sharing a screenshots" do
+	  hosting = @browshot.screenshot_share(0)
+	  assert_equal 'error', hosting['status'],						"Missing screenshot ID"
 	end
 
     should "retrieve account information" do
