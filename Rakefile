@@ -18,7 +18,7 @@ Jeweler::Tasks.new do |gem|
   gem.homepage = "http://github.com/juliensobrier/browshot-ruby"
   gem.license = "MIT"
   gem.summary = "Ruby library for Browshot (L<http://www.browshot.com/>), a web service to create website screenshots."
-  gem.description = "Browshot (http://www.browshot.com/) is a web service to easily make screenshots of web pages in any screen size, as any device: iPhone©, iPad©, Android©, Nook©, PC, etc. Browshot has full Flash, JavaScript, CSS, & HTML5 support. The latest API version is detailed at http://browshot.com/api/documentation. browshot.rb follows the API documentation very closely: the function names are similar to the URLs used (screenshot/create becomes screenshot_create(), instance/list becomes instance_list(), etc.), the request arguments are exactly the same, etc. The library version matches closely the API version it handles: browshot 1.0.0 is the first release for the API 1.0, browshot 1.1.1 is the second release for the API 1.1, etc. browshot.rb can handle most the API updates within the same major version, e.g. browshot.rb 1.0.0 should be compatible with the API 1.1 or 1.2."
+  gem.description = "Browshot (http://www.browshot.com/) is a web service to easily make screenshots of web pages in any screen size, as any device: iPhone, iPad, Android, Nook©, PC, etc. The latest API version is detailed at http://browshot.com/api/documentation."
   gem.email = "julien@sobrier.net"
   gem.authors = ["Julien Sobrier"]
   # dependencies defined in Gemfile
