@@ -166,6 +166,14 @@ class Browshot
 		return return_reply('screenshot/share', parameters)
 	end
 
+	# Delete details of a screenshot. See http://browshot.com/api/documentation#screenshot_delete for the response format.
+	#
+	# +id+:: screenshot ID
+	def screenshot_delete(id=0, parameters={})
+		parameters[:id] = id
+		return return_reply('screenshot/delete', parameters)
+	end
+
 
 	# Retrieve the screenshot, or a thumbnail, and save it to a file. See http://browshot.com/api/documentation#screenshot_thumbnails for the response format.
 	#
