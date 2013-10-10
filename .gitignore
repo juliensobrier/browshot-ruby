@@ -1,3 +1,5 @@
 .svn/
 pkg/
 rdoc/
+*~
+Gemfile.lock

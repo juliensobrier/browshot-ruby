@@ -1,11 +1,11 @@
 # The library requires an API key from Browshot.
-# Sign up fpr a free account a http://browshot.com/
+# Sign up for a free account a http://browshot.com/
 # 
 # See README.rdoc for more information abouth Browshot
 # and this library.
 #
 # Author::    Julien Sobrier  (mailto:jsobrier@browshot.com)
-# Copyright:: Copyright (c) 2012 Browshot
+# Copyright:: Copyright (c) 2013 Browshot
 # License::   Distributes under the same terms as Ruby
 
 require 'url'
@@ -34,7 +34,7 @@ class Browshot
 
 	# Return the API version handled by the library. Note that this library can usually handle new arguments in requests without requiring an update.
 	def api_version()
-		return "1.9"
+		return "1.12"
 	end
 
     # Retrieve a screenshot with one call. See http://browshot.com/api/documentation#simple for the full list of possible arguments.
@@ -173,6 +173,14 @@ class Browshot
 		parameters[:id] = id
 		return return_reply('screenshot/delete', parameters)
 	end
+	
+	# Get details about screenshots requested. See http://browshot.com/api/documentation#screenshot_search for the response format.
+	#
+	# +url+:: URL string to match
+	def screenshot_search(url='', parameters={})
+		parameters[:url] = url
+		return return_reply('screenshot/search', parameters)
+	end
 
 
 	# Retrieve the screenshot, or a thumbnail, and save it to a file. See http://browshot.com/api/documentation#screenshot_thumbnails for the response format.
@@ -240,7 +248,7 @@ class Browshot
         http.open_timeout = 240
         http.read_timeout = 240
 
-        request = Net::HTTP::Get.new(uri.request_uri)
+        request = Net::HTTP::Get.new(uri.request_uri, {'User-Agent' => 'Browshot Ruby 1.9.1'})
         if (uri.scheme == 'https')
             http.use_ssl = true
             http.verify_mode = OpenSSL::SSL::VERIFY_NONE

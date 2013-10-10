@@ -14,7 +14,7 @@ class TestBrowshot < Test::Unit::TestCase
     end
 
     should "get the API version" do
-      assert_equal '1.10', @browshot.api_version()
+      assert_equal '1.12', @browshot.api_version()
     end
 
     should "get a screenshot with the simple method" do
@@ -223,9 +223,9 @@ class TestBrowshot < Test::Unit::TestCase
 	  end
     end
 
-	should "to retrieve a screenshot with details==0" do
+	  should "to retrieve a screenshot with details==0" do
 	  screenshot = @browshot.screenshot_create('http://browshot.com/')
-      info  = @browshot.screenshot_info(screenshot['id'], { 'details' => 0 })
+	  info  = @browshot.screenshot_info(screenshot['id'], { 'details' => 0 })
 
 	  assert_equal false, info['id'].nil?,							"Screenshot ID should be present"
 	  assert_equal false, info['status'].nil?,						"Screenshot status should be present"
@@ -255,9 +255,9 @@ class TestBrowshot < Test::Unit::TestCase
 	  end
     end
 
-	should "to retrieve a screenshot with details==1" do
+	  should "to retrieve a screenshot with details==1" do
 	  screenshot = @browshot.screenshot_create('http://browshot.com/')
-      info  = @browshot.screenshot_info(screenshot['id'], { 'details' => 1 })
+	  info  = @browshot.screenshot_info(screenshot['id'], { 'details' => 1 })
 
 	  assert_equal false, info['id'].nil?,							"Screenshot ID should be present"
 	  assert_equal false, info['status'].nil?,						"Screenshot status should be present"
@@ -319,54 +319,55 @@ class TestBrowshot < Test::Unit::TestCase
 	  end
     end
 
-	should "to retrieve a screenshot with details==3" do
-	  screenshot = @browshot.screenshot_create('http://browshot.com/')
-      info  = @browshot.screenshot_info(screenshot['id'], { 'details' => 3 })
-
-	  assert_equal false, info['id'].nil?,							"Screenshot ID should be present"
-	  assert_equal false, info['status'].nil?,						"Screenshot status should be present"
-	  assert_equal false, info['priority'].nil?,					"Screenshot priority should be present"
-	  assert_equal false, info['cost'].nil?,						"Screenshot cost should be present"
-
-	  if (info['status'] == 'finished')
-	  	assert_equal false, info['screenshot_url'].nil?, 			"Screenshot screenshot_url should be present"
-	  	assert_equal false, info['url'].nil?, 						"Screenshot url should be present"
-	  	assert_equal false, info['size'].nil?, 						"Screenshot size should be present"
-	  	assert_equal false, info['width'].nil?, 					"Screenshot width should be present"
-	  	assert_equal false, info['height'].nil?, 					"Screenshot height should be present"
-	  	assert_equal false, info['instance_id'].nil?, 				"Screenshot instance_id should be present"
-	  	assert_equal false, info['final_url'].nil?, 				"Screenshot final_url should be present"
-	  	assert_equal false, info['scale'].nil?, 					"Screenshot scale should be present"
-
-	  	assert_equal false, info['response_code'].nil?, 			"Screenshot response_code should be present"
-	  	assert_equal false, info['content_type'].nil?, 				"Screenshot content_type should be present"
-
-	  	assert_equal false, info['started'].nil?, 					"Screenshot started should be present"
-	  	assert_equal false, info['finished'].nil?, 					"Screenshot finished should be present"
-	  	assert_equal false, info['load'].nil?, 						"Screenshot load should be present"
-	  	assert_equal false, info['request_time'].nil?, 				"Screenshot request_time should be present"
-	  	assert_equal false, info['content'].nil?, 					"Screenshot content should be present"
-
-		assert_equal false, info['images'].nil?, 					"Screenshot images should be present"
-		assert_equal true, info['images'].length > 0, 				"Screenshot images should be present"
-		assert_equal false, info['scripts'].nil?, 					"Screenshot scripts should be present"
-		assert_equal false, info['iframes'].nil?, 					"Screenshot iframes should be present"
-		assert_equal false, info['embeds'].nil?, 					"Screenshot embeds should be present"
-	  end
-    end
+# 	  Details = 2 by default
+# 	  should "to retrieve a screenshot with details==3" do
+# 	  screenshot = @browshot.screenshot_create('http://browshot.com/')
+# 	  info  = @browshot.screenshot_info(screenshot['id'], { 'details' => 3 })
+# 
+# 	  assert_equal false, info['id'].nil?,							"Screenshot ID should be present"
+# 	  assert_equal false, info['status'].nil?,						"Screenshot status should be present"
+# 	  assert_equal false, info['priority'].nil?,					"Screenshot priority should be present"
+# 	  assert_equal false, info['cost'].nil?,						"Screenshot cost should be present"
+# 
+# 	  if (info['status'] == 'finished')
+# 	  	assert_equal false, info['screenshot_url'].nil?, 			"Screenshot screenshot_url should be present"
+# 	  	assert_equal false, info['url'].nil?, 						"Screenshot url should be present"
+# 	  	assert_equal false, info['size'].nil?, 						"Screenshot size should be present"
+# 	  	assert_equal false, info['width'].nil?, 					"Screenshot width should be present"
+# 	  	assert_equal false, info['height'].nil?, 					"Screenshot height should be present"
+# 	  	assert_equal false, info['instance_id'].nil?, 				"Screenshot instance_id should be present"
+# 	  	assert_equal false, info['final_url'].nil?, 				"Screenshot final_url should be present"
+# 	  	assert_equal false, info['scale'].nil?, 					"Screenshot scale should be present"
+# 
+# 	  	assert_equal false, info['response_code'].nil?, 			"Screenshot response_code should be present"
+# 	  	assert_equal false, info['content_type'].nil?, 				"Screenshot content_type should be present"
+# 
+# 	  	assert_equal false, info['started'].nil?, 					"Screenshot started should be present"
+# 	  	assert_equal false, info['finished'].nil?, 					"Screenshot finished should be present"
+# 	  	assert_equal false, info['load'].nil?, 						"Screenshot load should be present"
+# 	  	assert_equal false, info['request_time'].nil?, 				"Screenshot request_time should be present"
+# 	  	assert_equal false, info['content'].nil?, 					"Screenshot content should be present"
+# 
+# 		assert_equal false, info['images'].nil?, 					"Screenshot images should be present"
+# 		assert_equal true, info['images'].length > 0, 				"Screenshot images should be present"
+# 		assert_equal false, info['scripts'].nil?, 					"Screenshot scripts should be present"
+# 		assert_equal false, info['iframes'].nil?, 					"Screenshot iframes should be present"
+# 		assert_equal false, info['embeds'].nil?, 					"Screenshot embeds should be present"
+# 	  end
+#     end
 
     should "retrieve the list of screenshots" do
 	  screenshots = @browshot.screenshot_list()
 	  assert_equal true, screenshots.length > 0,					"There should be multiple screenshots"
 
-      screenshot_id = 0
+	  screenshot_id = 0
 	  screenshots.each do |key, screenshot|
 		screenshot_id = key
 		break
 	  end
 
 	  assert_equal true, screenshot_id.to_i > 0,					"Screenshot ID should be positive"
-      screenshot = screenshots[screenshot_id]
+	  screenshot = screenshots[screenshot_id]
 
 	  assert_equal false, screenshot['id'].nil?,					"Screenshot ID should be present"
 	  assert_equal false, screenshot['status'].nil?,				"Screenshot status should be present"
@@ -412,7 +413,7 @@ class TestBrowshot < Test::Unit::TestCase
 	  screenshots = @browshot.screenshot_list()
 	  assert_equal true, screenshots.length > 0,					"There should be multiple screenshots"
 
-      screenshot_id = 0
+	  screenshot_id = 0
 	  screenshots.each do |key, screenshot|
 		screenshot_id = key
 		break
@@ -440,6 +441,25 @@ class TestBrowshot < Test::Unit::TestCase
 	  hosting = @browshot.screenshot_share(0)
 	  assert_equal 'error', hosting['status'],						"Missing screenshot ID"
 	end
+	
+	should "Search for screenshots" do
+	  screenshots = @browshot.screenshot_search('google.com', { :details => 0 })
+	  assert_equal true, screenshots.length > 0,					"There should be multiple screenshots"
+
+	  screenshot_id = 0
+	  screenshots.each do |key, screenshot|
+		screenshot_id = key
+		break
+	  end
+
+	  assert_equal true, screenshot_id.to_i > 0,					"Screenshot ID should be positive"
+	  screenshot = screenshots[screenshot_id]
+
+	  assert_equal false, screenshot['id'].nil?,					"Screenshot ID should be present"
+	  assert_equal false, screenshot['status'].nil?,				"Screenshot status should be present"
+	  assert_equal false, screenshot['priority'].nil?,				"Screenshot priority should be present"
+	  assert_equal false, screenshot['cost'].nil?,					"Screenshot cost should be present"
+	end	
 
     should "retrieve account information" do
 	  account = @browshot.account_info()
@@ -447,7 +467,7 @@ class TestBrowshot < Test::Unit::TestCase
 	  assert_equal 0,     account['balance'].to_i, 					"Balance should be empty"
 	  assert_equal false, account['active'].nil?, 					"Account active should be present"
 	  assert_equal 1,     account['active'].to_i, 					"Accountshould be active"
-	  assert_equal false, account['instances'].nil?, 				"Account instances should be present"
+# 	  assert_equal false, account['instances'].nil?, 				"Account instances should be present"
 	end
 
     should "refuse invalid key" do
