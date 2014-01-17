@@ -6,7 +6,7 @@ group :runtime do
   gem "url", ">= 0"
 end
 
-# Dependencies to develop browshot.
+# Dependencies to develop browshot
 group :development do
   gem "json", ">= 0"
   gem "url", ">= 0"
