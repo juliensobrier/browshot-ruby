@@ -13,9 +13,9 @@ Browshot gem is availabe at rubygems: https://rubygems.org/gems/browshot
 == Build and install browshot
 
     git clone https://github.com/juliensobrier/browshot-ruby
-    rake build
+    gem build browshot.gemspec
+    gem install --dev browshot-<version>.gem
     rake test
-    rake install
 
 Or
 

@@ -4,7 +4,7 @@
 # See README.rdoc for more information abouth Browshot
 # and this library.
 #
-# Author::    Julien Sobrier  (mailto:jsobrier@browshot.com)
+# @author    Julien Sobrier  (mailto:jsobrier@browshot.com)
 # Copyright:: Copyright (c) 2013 Browshot
 # License::   Distributes under the same terms as Ruby
 
@@ -15,18 +15,21 @@ require 'net/http'
 require 'net/https'
 
 class Browshot
+	# @!attribute [r]
 	# API key
 	attr_reader :key
+	# @!attribute [r]
 	# Base URL for all API requests. You should use the default base provided by the library. Be careful if you decide to use HTTP instead of HTTPS as your API key could be sniffed and your account could be used without your consent.
 	attr_reader :base
+	# @!attribute [r]
 	# print debug output to the standard output
 	attr_reader :debug
 
 	# New client
 	#
-	# +key+:: API key
-	# +base+:: Base URL for all API requests. You should use the default base provided by the library. Be careful if you decide to use HTTP instead of HTTPS as your API key could be sniffed and your account could be used without your consent.
-	# +debug+:: Set to true to print debug output to the standard output. false (disabled) by default.
+	# @param key [String] API key
+	# @param base [String] Base URL for all API requests. You should use the default base provided by the library. Be careful if you decide to use HTTP instead of HTTPS as your API key could be sniffed and your account could be used without your consent.
+	# @param debug [Boolean] Set to true to print debug output to the standard output. false (disabled) by default.
 	def initialize(key='', base='https://api.browshot.com/api/v1/', debug=false)
 		@key = key || ''
 		@base = base || 'http://127.0.0.1:3000/api/v1/'
@@ -38,9 +41,9 @@ class Browshot
 		return "1.14"
 	end
 
-    # Retrieve a screenshot with one call. See http://browshot.com/api/documentation#simple for the full list of possible arguments.
+    # Retrieve a screenshot with one call. See {https://browshot.com/api/documentation#simple} for the full list of possible arguments.
     #
-    # Return {:code => 200, :png => <content>} in case of success
+    # @return [Array<Symbol, Symbol>] !{:code => 200, :png => <content>} in case of success
     def simple(parameters={})
         begin
             url = make_url('simple', parameters)
@@ -57,11 +60,11 @@ class Browshot
         end
     end
 
-    # Save a screenshot to a file with one call, and save it to a file. See http://browshot.com/api/documentation#simple for the full list of possible arguments.
+    # Save a screenshot to a file with one call, and save it to a file. See {https://browshot.com/api/documentation#simple} for the full list of possible arguments.
     #
-    # Return {:code => 200, :file => <file_name>} in case of success
-    #
-    # +file+::  Local file name to write to.
+    # @param file [String] Local file name to write to.
+    # @param parameters  [Array<Symbol, Symbol>] Additional options
+    # @return [Array<Symbol, Symbol>] !{:code => 200, :file => <file_name>} in case of success
     def simple_file(file='', parameters={})
         data = self.simple(parameters)
         if (data[:png].length > 0)
@@ -79,7 +82,7 @@ class Browshot
 
 	# Return the details of an instance. See http://browshot.com/api/documentation#instance_info for the response format.
 	#
-	# +id+:: Instance ID
+	# @param id [Integer] Instance ID
 	def instance_info(id=0)
 		return return_reply('instance/info', { 'id' => id })
 	end
@@ -96,7 +99,7 @@ class Browshot
 
 	# Return the details of a browser. See http://browshot.com/api/documentation#browser_info for the response format.
 	#
-	# +id+:: Browser ID
+	# @param id [Integer]  Browser ID
 	def browser_info(id=0)
 		return return_reply('browser/info', { 'id' => id })
 	end
@@ -108,7 +111,7 @@ class Browshot
 
 	# Request a screenshot. See http://browshot.com/api/documentation#screenshot_create for the response format.
 	#
-	# +url+:: URL of the website to create a screenshot of.
+	# @param url [String] URL of the website to create a screenshot of.
 	def screenshot_create(url='', parameters={})
 		parameters[:url] = url
 		return return_reply('screenshot/create', parameters)
@@ -116,7 +119,7 @@ class Browshot
 
 	# Get information about a screenshot requested previously. See http://browshot.com/api/documentation#screenshot_info for the response format.
 	#
-	# +id+:: screenshot ID
+	# @param id [Integer] screenshot ID
 	def screenshot_info(id=0, parameters={})
 		parameters[:id] = id
 		return return_reply('screenshot/info', parameters)
@@ -129,8 +132,8 @@ class Browshot
 
 	# Retrieve the screenshot, or a thumbnail. See http://browshot.com/api/documentation#screenshot_thumbnails for the response format.
 	#
-	# Return an empty string if the image could not be retrieved.
-	# +id+:: screenshot ID
+	# @eturn an empty string if the image could not be retrieved.
+	# @param id [Integer] screenshot ID
 	def screenshot_thumbnail(id=0, parameters={})
 		parameters[:id] = id
 
@@ -151,8 +154,8 @@ class Browshot
 
 	# Hot a screenshot or thumbnail. See http://browshot.com/api/documentation#screenshot_host for the response format.
 	#
-	# +id+:: screenshot ID
-	# +hosting+:: hosting option: s3, cdn or browshot
+	# @param id [Integer] screenshot ID
+	# @param hosting ['s3', 'browshot'] hosting option: s3 or browshot
 	def screenshot_host(id=0, hosting='browshot', parameters={})
 		parameters[:id] = id
 		parameters[:hosting] = hosting
@@ -161,7 +164,7 @@ class Browshot
 
 	# Share a screenshot. See http://browshot.com/api/documentation#screenshot_share for the response format.
 	#
-	# +id+:: screenshot ID
+	# @param id [Integer] screenshot ID
 	def screenshot_share(id=0, parameters={})
 		parameters[:id] = id
 		return return_reply('screenshot/share', parameters)
@@ -169,7 +172,7 @@ class Browshot
 
 	# Delete details of a screenshot. See http://browshot.com/api/documentation#screenshot_delete for the response format.
 	#
-	# +id+:: screenshot ID
+	# @param id [Integer] screenshot ID
 	def screenshot_delete(id=0, parameters={})
 		parameters[:id] = id
 		return return_reply('screenshot/delete', parameters)
@@ -177,7 +180,7 @@ class Browshot
 	
 	# Get details about screenshots requested. See http://browshot.com/api/documentation#screenshot_search for the response format.
 	#
-	# +url+:: URL string to match
+	# @param url [String] URL string to match
 	def screenshot_search(url='', parameters={})
 		parameters[:url] = url
 		return return_reply('screenshot/search', parameters)
@@ -188,8 +191,8 @@ class Browshot
 	#
 	# See http://browshot.com/api/documentation#screenshot_thumbnails for the full list of possible arguments.
 	# 
-	# +id+:: screenshot ID
-	# +file+::  Local file name to write to.
+	# @param id [Integer] screenshot ID
+	# @param file [String]  Local file name to write to.
 	def screenshot_thumbnail_file(id=0, file='', parameters={})
 		content = screenshot_thumbnail(id, parameters);
 
@@ -207,7 +210,7 @@ class Browshot
 	#
 	# See http://browshot.com/api/documentation#screenshot_html for the full list of possible arguments.
 	# 
-	# +id+:: screenshot ID
+	# @param id [Integer] screenshot ID
 	def screenshot_html(id=0, parameters={})
 		parameters[:id] = id
 
@@ -219,7 +222,7 @@ class Browshot
 	#
 	# See http://browshot.com/api/documentation#screenshot_multiple for the full list of possible arguments.
 	# 
-	# +url+:: URL of the website to create a screenshot of
+	# @param url [String] URL of the website to create a screenshot of
 	def screenshot_multiple(url='', parameters={})
 		parameters[:url] = url
 
@@ -230,8 +233,8 @@ class Browshot
 	#
 	# See http://browshot.com/api/documentation#batch_create for the full list of possible arguments.
 	# 
-	# +id+:: Instance ID
-	# +file+:: Path to the text file which contains the list of URLs
+	# @param id [Integer] Instance ID
+	# @param file [String] Path to the text file which contains the list of URLs
 	def batch_create(id=0, file='', parameters={})
 		parameters[:id] = id
 		parameters[:file] = file
@@ -239,11 +242,11 @@ class Browshot
 		return return_post_reply('batch/create', parameters)
 	end
 	
-	# Get information about a screenshot batch requested previously. See http://browshot.com/api/documentation#batch_info for the response format.
+	# Get information about a screenshot batch requested previously. See {https://browshot.com/api/documentation#batch_info} for the response format.
 	#
 	# See http://browshot.com/api/documentation#batch_info for the full list of possible arguments.
 	# 
-	# +id+:: Batch ID
+	# @param id [Integer] Batch ID
 	def batch_info(id=0,  parameters={})
 		parameters[:id] = id
 
@@ -251,7 +254,7 @@ class Browshot
 	end
 	
 
-	#  Return information about the user account. See http://browshot.com/api/documentation#account_info for the response format.
+	#  Return information about the user account. See {https://browshot.com/api/documentation#account_info} for the response format.
 	def account_info(parameters={})
 		return return_reply('account/info', parameters)
 	end
