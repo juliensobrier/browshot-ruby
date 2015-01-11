@@ -32,17 +32,17 @@ class TestBrowshot < Test::Unit::TestCase
     should "get the list of instances available" do
 #       assert_equal 10, @calculator.product(2, 5)
 	  instances = @browshot.instance_list()
-	  assert_equal false, instances['free'].nil?,				"List of free instances is missing"
-	  assert_equal true,  instances['free'].kind_of?(Array),	"List of free instances is incorrect"
-	  assert_equal true,  instances['free'].length > 0,			"There should be at least 1 free instance"
+	  assert_equal false, instances['free'].nil?,					"List of free instances is missing"
+	  assert_equal true,  instances['free'].kind_of?(Array),			"List of free instances is incorrect"
+	  assert_equal true,  instances['free'].length > 0,				"There should be at least 1 free instance"
 
-	  assert_equal false, instances['shared'].nil?,				"List of shared instances is missing"
-	  assert_equal true,  instances['shared'].kind_of?(Array),	"List of shared instances is incorrect"
-	  assert_equal true,  instances['shared'].length > 0,		"There should be at least 1 shared instance"
+	  assert_equal false, instances['shared'].nil?,					"List of shared instances is missing"
+	  assert_equal true,  instances['shared'].kind_of?(Array),			"List of shared instances is incorrect"
+	  assert_equal true,  instances['shared'].length > 0,				"There should be at least 1 shared instance"
 
-	  assert_equal false, instances['private'].nil?,			"List of private instances is missing"
-	  assert_equal true,  instances['private'].kind_of?(Array),	"List of private instances is incorrect"
-	  assert_equal true,  instances['private'].length == 0,		"There should be at least no private instance"
+	  assert_equal false, instances['private'].nil?,				"List of private instances is missing"
+	  assert_equal true,  instances['private'].kind_of?(Array),			"List of private instances is incorrect"
+	  assert_equal true,  instances['private'].length == 1,				"There should be at least no private instance"
 
 	  free = instances['free'][0]
 	  assert_equal false, free['id'].nil?,						"Missing instance ID"
@@ -50,14 +50,14 @@ class TestBrowshot < Test::Unit::TestCase
 	  assert_equal false, free['height'].nil?,					"Missing instance screen height"
 	  assert_equal false, free['load'].nil?,					"Missing instance load"
 	  assert_equal false, free['browser'].nil?,					"Missing instance browser"
-	  assert_equal false, free['browser']['id'].nil?,			"Missing instance browser ID"
-	  assert_equal false, free['browser']['name'].nil?,			"Missing instance browser name"
-	  assert_equal false, free['browser']['javascript'].nil?,	"Missing instance browser javascript capability"
-	  assert_equal false, free['browser']['flash'].nil?,		"Missing instance browser flash capability"
-	  assert_equal false, free['browser']['mobile'].nil?,		"Missing instance browser mobile capability"
+	  assert_equal false, free['browser']['id'].nil?,				"Missing instance browser ID"
+	  assert_equal false, free['browser']['name'].nil?,				"Missing instance browser name"
+	  assert_equal false, free['browser']['javascript'].nil?,			"Missing instance browser javascript capability"
+	  assert_equal false, free['browser']['flash'].nil?,				"Missing instance browser flash capability"
+	  assert_equal false, free['browser']['mobile'].nil?,				"Missing instance browser mobile capability"
 	  assert_equal false, free['type'].nil?,					"Missing instance type"
-	  assert_equal false, free['screenshot_cost'].nil?,			"Missing instance cost"
-	  assert_equal 0,     free['screenshot_cost'].to_i,			"Cost should be 0"
+	  assert_equal false, free['screenshot_cost'].nil?,				"Missing instance cost"
+	  assert_equal 0,     free['screenshot_cost'].to_i,				"Cost should be 0"
     end
 
     should "get an instance information" do
@@ -65,17 +65,17 @@ class TestBrowshot < Test::Unit::TestCase
 	  free = instances['free'][0]
 
 	  instance = @browshot.instance_info(free['id'])
-	  assert_equal free['id'], instance['id'],										"Mismatch instance ID"
-	  assert_equal free['width'], instance['width'],								"Mismatch instance screen width"
-	  assert_equal free['height'], instance['height'],								"Mismatch instance screen height"
-# 	  assert_equal free['load'], instance['load'],									"Mismatch instance load"
-	  assert_equal free['browser']['id'], instance['browser']['id'],				"Mismatch instance browser ID"
-	  assert_equal free['browser']['name'], instance['browser']['name'],			"Mismatch instance browser name"
+	  assert_equal free['id'], instance['id'],					"Mismatch instance ID"
+	  assert_equal free['width'], instance['width'],				"Mismatch instance screen width"
+	  assert_equal free['height'], instance['height'],				"Mismatch instance screen height"
+# 	  assert_equal free['load'], instance['load'],					"Mismatch instance load"
+	  assert_equal free['browser']['id'], instance['browser']['id'],		"Mismatch instance browser ID"
+	  assert_equal free['browser']['name'], instance['browser']['name'],		"Mismatch instance browser name"
 	  assert_equal free['browser']['javascript'], instance['browser']['javascript'],"Mismatch instance browser javascript capability"
-	  assert_equal free['browser']['flash'], instance['browser']['flash'],			"Mismatch instance browser flash capability"
-	  assert_equal free['browser']['mobile'], instance['browser']['mobile'],		"Mismatch instance browser mobile capability"
-	  assert_equal free['type'], instance['type'],									"Mismatch instance type"
-	  assert_equal free['screenshot_cost'], instance['screenshot_cost'],			"Mismatch instance cost"
+	  assert_equal free['browser']['flash'], instance['browser']['flash'],		"Mismatch instance browser flash capability"
+	  assert_equal free['browser']['mobile'].to_i, instance['browser']['mobile'].to_i,	"Mismatch instance browser mobile capability"
+	  assert_equal free['type'], instance['type'],					"Mismatch instance type"
+	  assert_equal free['screenshot_cost'].to_i, instance['screenshot_cost'].to_i,		"Mismatch instance cost"
     end
 
     should "send an error for the wrong instance ID" do
@@ -85,29 +85,29 @@ class TestBrowshot < Test::Unit::TestCase
  	  assert_equal false, instance['status'].nil?,					"Instance should not be found"
     end
 
-    should "send an errror when creating a instance with ivalid arguments" do
-	  instance = @browshot.instance_create({'width' => 3000})
- 	  assert_equal false, instance['error'].nil?,					"Instance width should be too large"
+#     should "send an errror when creating a instance with ivalid arguments" do
+# 	  instance = @browshot.instance_create({'width' => 3000})
+#  	  assert_equal false, instance['error'].nil?,					"Instance width should be too large"
+# 
+# 	  instance = @browshot.instance_create({'height' => 3000})
+#  	  assert_equal false, instance['error'].nil?,					"Instance width should be too large"
+# 
+# 	  instance = @browshot.instance_create({'browser_id' => -1})
+#  	  assert_equal false, instance['error'].nil?,					"Instance browser ID should be invalid"
+#     end
 
-	  instance = @browshot.instance_create({'height' => 3000})
- 	  assert_equal false, instance['error'].nil?,					"Instance width should be too large"
-
-	  instance = @browshot.instance_create({'browser_id' => -1})
- 	  assert_equal false, instance['error'].nil?,					"Instance browser ID should be invalid"
-    end
-
-    should "create a new instance" do
-# 	  Option disabled for most accounts
-	  instance = @browshot.instance_create()
-
-	  assert_equal false, instance['error'].nil?,					"Instance cannot be created for this account"
-# 	  assert_equal false, instance['id'].nil?,						"Instance ID should be present"
-# 	  assert_equal false, instance['width'].nil?,					"Instance screen width should be present"
-# 	  assert_equal false, instance['height'].nil?,					"Instance screen height should be present"
-# 	  assert_equal 1, 	  instance['active'].to_i,					"Instance should be active"
-# 	  assert_equal false, instance['browser'].nil?,					"Instance browser should be present"
-# 	  assert_equal false, instance['browser']['id'].nil?,			"Instance browser ID should be present"
-    end
+#     should "create a new instance" do
+# # 	  Option disabled for most accounts
+# 	  instance = @browshot.instance_create()
+# 
+# 	  assert_equal false, instance['error'].nil?,					"Instance cannot be created for this account"
+# # 	  assert_equal false, instance['id'].nil?,						"Instance ID should be present"
+# # 	  assert_equal false, instance['width'].nil?,					"Instance screen width should be present"
+# # 	  assert_equal false, instance['height'].nil?,					"Instance screen height should be present"
+# # 	  assert_equal 1, 	  instance['active'].to_i,					"Instance should be active"
+# # 	  assert_equal false, instance['browser'].nil?,					"Instance browser should be present"
+# # 	  assert_equal false, instance['browser']['id'].nil?,			"Instance browser ID should be present"
+#     end
 
     should "get the list of browsers" do
 	  browsers = @browshot.browser_list()
@@ -135,23 +135,23 @@ class TestBrowshot < Test::Unit::TestCase
 	  assert_equal false, browser['flash'].nil?,					"Browser flash capability should be present"
     end
 
-    should "create a browser" do
-	  # Option disabled for most accounts
-	  browser = @browshot.browser_create({'mobile' => 1, 'flash' => 1, 'user_agent' => 'test'})
-
-	  assert_equal false, browser['error'].nil?,					"Browser cannot be created for this account"
-# 	  assert_equal false, browser['name'].nil?,						"Browser name should be present"
-# 	  assert_equal false, browser['user_agent'].nil?,				"Browser user_agent should be present"
-# 	  assert_equal false, browser['appname'].nil?,					"Browser appname should be present"
-# 	  assert_equal false, browser['vendorsub'].nil?,				"Browser vendorsub should be present"
-# 	  assert_equal false, browser['appcodename'].nil?,				"Browser appcodename should be present"
-# 	  assert_equal false, browser['platform'].nil?,					"Browser platform should be present"
-# 	  assert_equal false, browser['vendor'].nil?,					"Browser vendor should be present"
-# 	  assert_equal false, browser['appversion'].nil?,				"Browser appversion should be present"
-# 	  assert_equal false, browser['javascript'].nil?,				"Browser javascript capability should be present"
-# 	  assert_equal false, browser['mobile'].nil?,					"Browser mobile capability should be present"
-# 	  assert_equal false, browser['flash'].nil?,					"Browser flash capability should be present"
-    end
+#     should "create a browser" do
+# 	  # Option disabled for most accounts
+# 	  browser = @browshot.browser_create({'mobile' => 1, 'flash' => 1, 'user_agent' => 'test'})
+# 
+# 	  assert_equal false, browser['error'].nil?,					"Browser cannot be created for this account"
+# # 	  assert_equal false, browser['name'].nil?,						"Browser name should be present"
+# # 	  assert_equal false, browser['user_agent'].nil?,				"Browser user_agent should be present"
+# # 	  assert_equal false, browser['appname'].nil?,					"Browser appname should be present"
+# # 	  assert_equal false, browser['vendorsub'].nil?,				"Browser vendorsub should be present"
+# # 	  assert_equal false, browser['appcodename'].nil?,				"Browser appcodename should be present"
+# # 	  assert_equal false, browser['platform'].nil?,					"Browser platform should be present"
+# # 	  assert_equal false, browser['vendor'].nil?,					"Browser vendor should be present"
+# # 	  assert_equal false, browser['appversion'].nil?,				"Browser appversion should be present"
+# # 	  assert_equal false, browser['javascript'].nil?,				"Browser javascript capability should be present"
+# # 	  assert_equal false, browser['mobile'].nil?,					"Browser mobile capability should be present"
+# # 	  assert_equal false, browser['flash'].nil?,					"Browser flash capability should be present"
+#     end
 
     should "fail to create screenshot" do
 	  screenshot = @browshot.screenshot_create()

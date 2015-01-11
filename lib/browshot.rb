@@ -87,10 +87,6 @@ class Browshot
 		return return_reply('instance/info', { 'id' => id })
 	end
 
-	# Create a private instance. See http://browshot.com/api/documentation#instance_create for the response format.
-	def instance_create(parameters={})
-		return return_reply('instance/create', parameters)
-	end
 
 	# Return the list of browsers. See http://browshot.com/api/documentation#browser_list for the response format.
 	def browser_list()
@@ -104,10 +100,6 @@ class Browshot
 		return return_reply('browser/info', { 'id' => id })
 	end
 
-	# Create a custom browser. See http://browshot.com/api/documentation#browser_create for the response format.
-	def browser_create(parameters={})
-		return return_reply('browser/create', parameters)
-	end
 
 	# Request a screenshot. See http://browshot.com/api/documentation#screenshot_create for the response format.
 	#
