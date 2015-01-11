@@ -16,6 +16,7 @@ Browshot gem is availabe at rubygems: https://rubygems.org/gems/browshot
     gem build browshot.gemspec
     gem install --dev browshot-<version>.gem
     rake test
+    rake rdoc
 
 Or
 
@@ -33,5 +34,5 @@ Or
 
 == Copyright
 
-Copyright (c) 2012 Julien Sobrier. See LICENSE.txt for
+Copyright (c) 2014 Julien Sobrier. See LICENSE.txt for
 further details.
