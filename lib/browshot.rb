@@ -5,7 +5,7 @@
 # and this library.
 #
 # @author    Julien Sobrier  (mailto:jsobrier@browshot.com)
-# Copyright:: Copyright (c) 2013 Browshot
+# Copyright:: Copyright (c) 2016 Browshot
 # License::   Distributes under the same terms as Ruby
 
 require 'rubygems'
@@ -13,6 +13,7 @@ require 'url'
 require 'json'
 require 'net/http'
 require 'net/https'
+require "cgi"
 
 class Browshot
 	# @!attribute [r]
@@ -28,17 +29,17 @@ class Browshot
 	# New client
 	#
 	# @param key [String] API key
-	# @param base [String] Base URL for all API requests. You should use the default base provided by the library. Be careful if you decide to use HTTP instead of HTTPS as your API key could be sniffed and your account could be used without your consent.
 	# @param debug [Boolean] Set to true to print debug output to the standard output. false (disabled) by default.
-	def initialize(key='', base='https://api.browshot.com/api/v1/', debug=false)
+	# @param base [String] Base URL for all API requests. You should use the default base provided by the library. Be careful if you decide to use HTTP instead of HTTPS as your API key could be sniffed and your account could be used without your consent.
+	def initialize(key='', debug=false, base='https://api.browshot.com/api/v1/')
 		@key = key || ''
-		@base = base || 'http://127.0.0.1:3000/api/v1/'
+		@base = base || 'https://api.browshot.com/api/v1/'
 		@debug = debug || false
 	end
 
 	# Return the API version handled by the library. Note that this library can usually handle new arguments in requests without requiring an update.
 	def api_version()
-		return "1.14"
+		return "1.16"
 	end
 
     # Retrieve a screenshot with one call. See {https://browshot.com/api/documentation#simple} for the full list of possible arguments.
@@ -213,11 +214,7 @@ class Browshot
 	# Request multiple screenshots. See http://browshot.com/api/documentation#screenshot_multiple for the response format.
 	#
 	# See http://browshot.com/api/documentation#screenshot_multiple for the full list of possible arguments.
-	# 
-	# @param url [String] URL of the website to create a screenshot of
-	def screenshot_multiple(url='', parameters={})
-		parameters[:url] = url
-
+	def screenshot_multiple(parameters={})
 		return return_reply('screenshot/multiple', parameters)
 	end
 	
@@ -228,7 +225,7 @@ class Browshot
 	# @param id [Integer] Instance ID
 	# @param file [String] Path to the text file which contains the list of URLs
 	def batch_create(id=0, file='', parameters={})
-		parameters[:id] = id
+		parameters[:instance_id] = id
 		parameters[:file] = file
 
 		return return_post_reply('batch/create', parameters)
@@ -254,11 +251,21 @@ class Browshot
 	private
 
 	def make_url(action='', parameters={})
-		url =  URL.new("#{@base}#{action}?key=#{@key}")
+		url =  "#{@base}#{action}?key=#{@key}"
 		
 		
 		parameters.each_pair do |key, value|
-			url.params[key] = value
+			if (key == 'urls')
+				value.each { |val|
+				  url += '&url=' + CGI::escape(val.to_s)
+				}
+			elsif (key == 'instances')
+				value.each { |instance|
+				  url += '&instance_id=' + CGI::escape(instance.to_s)
+				}
+			else
+				url += "&#{key}=" + CGI::escape(value.to_s)
+			end
 		end
 
 		puts "#{url}" if (@debug)
@@ -294,9 +301,9 @@ class Browshot
 		begin
 			url = make_url(action, parameters)
 			
-			response = url.get
+			response = Net::HTTP.get_response(URI(url))
 
-			if (response.success? == false)
+			if (response.code == 200)
 				puts "Error from #{url}: #{response.code}" if (@debug)
 			end
 			return response.response.body
@@ -312,7 +319,7 @@ class Browshot
 			parameters.delete(:file)
 			url = make_url(action, parameters)
 			
-			response = post(url.to_s,file)
+			response = post(url,file)
 
 			case response
 			  when Net::HTTPSuccess     then 

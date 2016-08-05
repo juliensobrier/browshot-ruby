@@ -6,4 +6,5 @@ gem "url", ">= 0"
 
 group :test do
   gem 'shoulda'
+	gem 'test-unit'
 end

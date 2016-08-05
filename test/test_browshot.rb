@@ -14,7 +14,7 @@ class TestBrowshot < Test::Unit::TestCase
     end
 
     should "get the API version" do
-      assert_equal '1.14', @browshot.api_version()
+      assert_equal '1.16', @browshot.api_version()
     end
 
     should "get a screenshot with the simple method" do

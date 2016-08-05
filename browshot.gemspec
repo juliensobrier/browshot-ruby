@@ -1,8 +1,8 @@
 Gem::Specification.new do |s|
   s.name        = 'browshot'
-  s.version     = '1.14.0'
-  s.date        = '2014-01-20'
-  s.summary     = "Take website screenshtos with Browshot"
+  s.version     = '1.16.0'
+  s.date        = '2016-08-01'
+  s.summary     = "Take website screenshots with Browshot"
   s.description = "Library for the Browshot API"
   s.authors     = ["Julien Sobrier"]
   s.email       = 'julien@sobrier.net'
@@ -17,4 +17,5 @@ Gem::Specification.new do |s|
   s.add_development_dependency "rake"
   s.add_development_dependency "shoulda"
   s.add_development_dependency "yard"
+	s.add_development_dependency 'test-unit'
 end
