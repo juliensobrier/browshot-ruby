@@ -22,6 +22,62 @@ Or
 
     gem install browshot
 
+== API 1.32
+
+Pass capture options in the existing parameter hash.
+
+    require 'browshot'
+
+    client = Browshot.new(ENV.fetch('BROWSHOT_API_KEY'))
+    capture = client.screenshot_create('https://example.com/',
+      instance_id: 373, pdf: 1, pdf_format: 'a4', pdf_margin: '10mm',
+      device_scale: 2, hide_ads: 1)
+
+Poll +screenshot_info(capture['id'])+ until its status is +finished+.
+Use +screenshot_pdf(capture['id'])+ to read the PDF bytes or
++screenshot_pdf_file(capture['id'], 'example.pdf')+ to save them.
+
+For a video or animated GIF, request the recording when creating the capture.
+
+    recording = client.screenshot_create('https://example.com/',
+      instance_id: 373, video: 1, video_format: 'gif',
+      video_duration: 5, video_scale: 0.5)
+
+Once the capture finishes, use +screenshot_video(recording['id'])+ for the
+bytes or +screenshot_video_file(recording['id'], 'example.gif')+ to save the
+file. The video formats are WebM (default), MP4, and GIF. MP4 can fall back to
+WebM, and the file helper uses the supplied path and extension. Download
+methods return binary strings, and file helpers return the path on success.
+Both return an empty string on failure.
+
+PDF options include paper format (+letter+, +a4+, or +legal+), background,
+landscape, one-page output, and PDF margins. Video options include duration
+(1 to 30 seconds), quality (0 to 63), frame rate (1 to 30), and scale
+(0.1 to 1). GIF uses 20 frames per second.
+
+Choose a country with +instance_id+. The new instances below are listed in
+order Chrome, Firefox, iPhone 12, and Samsung S20.
+
+    France          373  374  375  376
+    India           377  378  379  380
+    Finland         381  382  383  384
+    United Kingdom  385  386  387  388
+
+Each instance costs one credit before options. PDF adds one credit, and a
+recording adds one credit for every started five seconds of requested duration.
+PDF and video require a paid Chrome-based instance. Recording requires
++device_scale=1+. Retina (+device_scale=2+), ad blocking (+hide_ads=1+), and
+downloads add no credits.
+
+== Tests
+
+Run +bundle install+ and +bundle exec rake test+. The offline tests use a
+loopback HTTP server. Set +BROWSHOT_API_KEY+ to run live tests. Use
++BROWSHOT_SCREENSHOT_ID+ for an owned finished screenshot and
++BROWSHOT_RETINA_ID+ for one with retina and ad blocking enabled. The PDF,
+WebM, MP4, and GIF checks use +BROWSHOT_PDF_ID+, +BROWSHOT_WEBM_ID+,
++BROWSHOT_MP4_ID+, and +BROWSHOT_GIF_ID+ for finished captures in your account.
+
 == Contributing to browshot
  
 * Check out the latest master to make sure the feature hasn't been implemented or the bug hasn't been fixed yet
@@ -34,5 +90,5 @@ Or
 
 == Copyright
 
-Copyright (c) 2014 Julien Sobrier. See LICENSE.txt for
+Copyright (c) 2026 Julien Sobrier. See LICENSE.txt for
 further details.

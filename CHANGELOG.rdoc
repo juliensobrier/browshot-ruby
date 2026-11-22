@@ -1,0 +1,12 @@
+= Changelog
+
+== 1.32.0
+
+* Add +screenshot_pdf+, +screenshot_pdf_file+, +screenshot_video+, and
+  +screenshot_video_file+ for PDF, WebM, MP4, and GIF downloads.
+* Pass the API 1.32 options through existing capture methods. Fix the batch
+  upload content type and allow the crawl starting URL in its options hash.
+* Encode API keys and accept either symbol or string keys for repeated URL
+  and instance options.
+* Document the options, credit costs, and native country instance IDs.
+* Add offline artifact tests and opt-in live tests with an environment key.
