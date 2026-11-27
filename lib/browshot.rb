@@ -16,7 +16,7 @@ require 'net/https'
 require "cgi"
 
 class Browshot
-	VERSION = '1.32.0'
+	VERSION = '2.0.0'
 
 	# @!attribute [r]
 	# API key
@@ -33,9 +33,10 @@ class Browshot
 	# @param key [String] API key
 	# @param debug [Boolean] Set to true to print debug output to the standard output. false (disabled) by default.
 	# @param base [String] Base URL for all API requests. You should use the default base provided by the library. Be careful if you decide to use HTTP instead of HTTPS as your API key could be sniffed and your account could be used without your consent.
-	def initialize(key='', debug=false, base='https://api.browshot.com/api/v1/')
+	def initialize(key='', debug=false, base=nil)
 		@key = key || ''
-		@base = base || 'https://api.browshot.com/api/v1/'
+		@auto_api = base.nil?
+		@base = base || 'https://api.browshot.com/api/v2/'
 		@debug = debug || false
 	end
 
@@ -49,8 +50,7 @@ class Browshot
     # @return [Array<Symbol, Symbol>] !{:code => 200, :png => <content>} in case of success
     def simple(parameters={})
         begin
-            url = make_url('simple', parameters)
-            response = fetch(url.to_s)
+            response = request('simple', parameters) { |url| fetch(url) }
             case response
                 when Net::HTTPSuccess     then 
                     return {:code => response.code, :png => response.response.body}
@@ -99,8 +99,13 @@ class Browshot
 	# Return the details of a browser. See http://browshot.com/api/documentation#browser_info for the response format.
 	#
 	# @param id [Integer]  Browser ID
-	def browser_info(id=0)
-		return return_reply('browser/info', { 'id' => id })
+	def browser_info(id=0, parameters={})
+		if ['chrome', 'firefox'].include?(id.to_s)
+			parameters = parameters.merge(:browser => id)
+		elsif id != 0 || !parameters.keys.any? { |key| key.to_s == 'browser' }
+			parameters = parameters.merge(:id => id)
+		end
+		return return_reply('browser/info', parameters)
 	end
 
 
@@ -133,8 +138,7 @@ class Browshot
 		parameters[:id] = id
 
 		begin
-            url = make_url('screenshot/thumbnail', parameters)
-            response = fetch(url.to_s)
+            response = request('screenshot/thumbnail', parameters) { |url| fetch(url) }
             case response
                 when Net::HTTPSuccess     then 
                     return response.response.body
@@ -254,9 +258,13 @@ class Browshot
 	# 
 	# @param id [Integer] Instance ID
 	# @param file [String] Path to the text file which contains the list of URLs
-	def batch_create(id=0, file='', parameters={})
-		parameters[:instance_id] = id
-		parameters[:file] = file
+	def batch_create(id=nil, file='', parameters={})
+		if id.is_a?(String) && id !~ /\A\d+\z/
+			parameters = file if file.is_a?(Hash)
+			file, id = id, nil
+		end
+		parameters = parameters.merge(:file => file)
+		parameters[:instance_id] = id unless id.nil?
 
 		return return_post_reply('batch/create', parameters)
 	end
@@ -277,8 +285,13 @@ class Browshot
 	# @param id [Integer] Instance ID
 	# @param domain [String] Domain to crawl
 	# @param parameters [Hash] Capture options, including an optional :url to start with
-	def crawl_create(id=0, domain='', parameters={})
-		parameters = parameters.merge(:instance_id => id)
+	def crawl_create(id=nil, domain='', parameters={})
+		if id.is_a?(String) && id !~ /\A\d+\z/
+			parameters = domain if domain.is_a?(Hash)
+			domain, id = id, nil
+		end
+		parameters = parameters.dup
+		parameters[:instance_id] = id unless id.nil?
 		unless domain.empty?
 			parameters.delete('domain')
 			parameters[:domain] = domain
@@ -304,6 +317,38 @@ class Browshot
 		return return_reply('account/info', parameters)
 	end
 
+	def device_list(parameters={})
+		return return_reply('device/list', parameters)
+	end
+
+	def app_list(parameters={})
+		return return_reply('app/list', parameters)
+	end
+
+	def app_info(id, parameters={})
+		return return_reply('app/info', parameters.merge(:id => id))
+	end
+
+	def app_create(parameters)
+		return app_request('app/create', parameters)
+	end
+
+	def app_update(id, parameters)
+		return app_request('app/update', parameters.merge(:id => id))
+	end
+
+	def app_delete(id, parameters={})
+		return app_request('app/delete', parameters.merge(:id => id))
+	end
+
+	def app_test(id, parameters={})
+		return app_request('app/test', parameters.merge(:id => id))
+	end
+
+	def app_run(id, apps, parameters={})
+		return app_request('app/run', parameters.merge(:screenshot_id => id, :apps => apps))
+	end
+
 	private
 
 	def screenshot_artifact(kind, id, parameters, content_types)
@@ -311,12 +356,14 @@ class Browshot
 
 		query = parameters.reject { |key, _| key.to_s == 'id' }
 		query[:id] = id
-		url = URI(make_url('screenshot/' + kind, query))
-		request = Net::HTTP::Get.new(url.request_uri, {
-			'Accept-Encoding' => 'identity', 'User-Agent' => "Browshot Ruby #{VERSION}"
-		})
-		response = Net::HTTP.start(url.host, url.port, :use_ssl => url.scheme == 'https') do |http|
-			http.request(request)
+		response = request('screenshot/' + kind, query) do |address|
+			url = URI(address)
+			get = Net::HTTP::Get.new(url.request_uri, {
+				'Accept-Encoding' => 'identity', 'User-Agent' => "Browshot Ruby #{VERSION}"
+			})
+			Net::HTTP.start(url.host, url.port, :use_ssl => url.scheme == 'https') do |http|
+				http.request(get)
+			end
 		end
 		return ''.b unless response.code == '200'
 
@@ -346,29 +393,77 @@ class Browshot
 		return ''
 	end
 
+	def app_request(action, parameters)
+		body = {}
+		parameters.each_pair { |key, value| body[key.to_s] = value }
+		query = { :api_version => body.delete('api_version') }
+		['id', 'screenshot_id'].each do |field|
+			body[field] = body[field].to_i if body[field].to_s =~ /\A\d+\z/
+		end
+		if ['0', '1'].include?(body['isActive'].to_s)
+			body['isActive'] = body['isActive'].to_s == '1'
+		end
+		body['apps'] = body['apps'].map(&:to_s) if body['apps'].is_a?(Array)
+		return JSON.parse(post(make_url(action, query), '', body).body)
+	end
+
+	def version_for(action, parameters)
+		version = (parameters[:api_version] || parameters['api_version']).to_s
+		return version if ['1', '2'].include?(version)
+		return nil unless @auto_api
+		return '1' if action =~ %r{\A(?:instance/|browser/create\z|screenshot/host\z)}
+
+		id = parameters[:id] || parameters['id']
+		return '1' if action == 'browser/info' && id && !['40', '42'].include?(id.to_s)
+
+		legacy = /\A(?:instance_id|instance_ids|instances|screen|details|ids|hook(?:_.+)?|hosting(?:_.+)?|device_name|device_touch|device_mobile|device_landscape|user_agent)\z/
+		return '1' if parameters.any? { |key, value| !value.nil? && value != [] && legacy.match(key.to_s) }
+		return '2'
+	end
+
 	def make_url(action='', parameters={})
-		url =  "#{@base}#{action}?key=#{CGI::escape(@key.to_s)}"
-		
-		
+		version = version_for(action, parameters)
+		base = @base.sub(%r{/\z}, '')
+		base = base.sub(%r{/api/v[12]\z}, '/api/v' + version) if version
+		url = "#{base}/#{action}?key=#{CGI.escape(@key.to_s)}"
+		encode = lambda { |key, value| "&#{CGI.escape(key)}=#{CGI.escape(value.to_s)}" }
+
 		parameters.each_pair do |key, value|
-			if (key.to_s == 'urls')
-				value.each { |val|
-				  url += '&url=' + CGI::escape(val.to_s)
-				}
-			elsif (key.to_s == 'instances')
-				value.each { |instance|
-				  url += '&instance_id=' + CGI::escape(instance.to_s)
-				}
+			key = key.to_s
+			next if key == 'api_version' || value.nil?
+			key = { 'urls' => 'url', 'instances' => 'instance_id' }.fetch(key, key)
+			value = JSON.generate(value) if key == 'profiles' && value.is_a?(Array)
+			if key == 'apps' && value.is_a?(Hash)
+				value.each_pair { |app, template| url += encode.call("apps[#{app}]", template) unless template.nil? }
 			else
-				url += "&#{CGI::escape(key.to_s)}=" + CGI::escape(value.to_s)
+				values = ['url', 'instance_id', 'apps'].include?(key) && value.is_a?(Array) ? value : [value]
+				values.each { |item| url += encode.call(key, item) unless item.nil? }
 			end
 		end
-
-		puts "#{url}" if (@debug)
-
+		puts "#{base}/#{action}" if @debug
 		return url
 	end
-		
+
+	def request(action, parameters)
+		url = make_url(action, parameters)
+		response = yield url
+		return response unless @auto_api && (parameters[:api_version] || parameters['api_version']).nil?
+		return response unless version_for(action, parameters) == '2' && response.code == '404'
+		return response if response.uri && response.uri.path != URI(url).path
+		return response if action =~ %r{\A(?:app/|device/|wait\z|batch/download\z|ping\z|simple/)}
+		v2_only = /\A(?:browser|country|screen_width|screen_height|mobile|device|profiles|apps(?:\[.*\])?)\z/
+		return response if parameters.any? { |key, value| !value.nil? && v2_only.match(key.to_s) }
+		return response unless response['content-type'].to_s =~ %r{\Aapplication/json(?:;|\z)}i
+
+		error = JSON.parse(response.body)
+		if error.is_a?(Hash) && error['success'] == false && error['error'] == 'NOT_FOUND' && error['message'] == 'Page not found'
+			return yield make_url(action, parameters.merge(:api_version => 1))
+		end
+		return response
+	rescue JSON::ParserError
+		return response
+	end
+
 	def return_reply(action='', parameters={})
 		begin
 			content = return_string(action, parameters)
@@ -394,40 +489,15 @@ class Browshot
 	end
 	    
 	def return_string(action='', parameters={})
-		begin
-			url = make_url(action, parameters)
-			
-			response = Net::HTTP.get_response(URI(url))
-
-			if (response.code == 200)
-				puts "Error from #{url}: #{response.code}" if (@debug)
-			end
-			return response.response.body
-		rescue Exception => e
-			puts "{e.message}" if (@debug)
-			raise e
-		end
+		response = request(action, parameters) { |url| Net::HTTP.get_response(URI(url)) }
+		return response.body
 	end
-	
-	def return_post_string(action='', parameters={})
-		begin
-			file = parameters[:file]
-			parameters.delete(:file)
-			url = make_url(action, parameters)
-			
-			response = post(url,file)
 
-			case response
-			  when Net::HTTPSuccess     then 
-			      return response.response.body
-			  else
-			      puts "Error from #{url}: #{response.code}" if (@debug)
-			      return response.response.body
-			end
-		rescue Exception => e
-			puts "{e.message}" if (@debug)
-			raise e
-		end
+	def return_post_string(action='', parameters={})
+		query = parameters.dup
+		file = query.delete(:file)
+		response = request(action, query) { |url| post(url, file) }
+		return response.body
 	end
 
 	def fetch(url, limit=32)
@@ -438,7 +508,7 @@ class Browshot
 	    http.open_timeout = 240
 	    http.read_timeout = 240
 
-	    request = Net::HTTP::Get.new(uri.request_uri, {'User-Agent' => "Browshot Ruby #{VERSION}"})
+	    request = Net::HTTP::Get.new(uri, {'User-Agent' => "Browshot Ruby #{VERSION}"})
 	    if (uri.scheme == 'https')
 		http.use_ssl = true
 		http.verify_mode = OpenSSL::SSL::VERIFY_NONE
@@ -448,38 +518,41 @@ class Browshot
 	    case response
 		when Net::HTTPRedirection then 
 		    path = response['location']
-		    url = URL.new( URI.join(@base, path).to_s )
+		    url = URI.join(uri, path)
 		    return fetch(url.to_s, limit - 1)
 		else
 		    return response
 	    end
 	end
 	
-	def post(url, file='')
-	    raise ArgumentError, 'Missing file to upload' if (file == '')
+	def post(url, file='', json=nil)
+	    raise ArgumentError, 'Missing file to upload' if (file == '' && json.nil?)
 	  
 	    uri = URI.parse(url)
 	    http = Net::HTTP.new(uri.host, uri.port)
 	    http.open_timeout = 240
 	    http.read_timeout = 240
 	    
-	    boundary = "AaB03x"
-	    
-	    post_body = []
-	    post_body << "--#{boundary}\r\n"
-	    post_body << "Content-Disposition: form-data; name=\"file\"; filename=\"#{File.basename(file)}\"\r\n"
-	    post_body << "Content-Type: text/plain\r\n"
-	    post_body << "\r\n"
-	    post_body << File.read(file)
-	    post_body << "\r\n--#{boundary}--\r\n"
-
 	    request = Net::HTTP::Post.new(uri.request_uri, {'User-Agent' => "Browshot Ruby #{VERSION}"})
-	    request.body = post_body.join
-	    request["Content-Type"] = "multipart/form-data; boundary=#{boundary}"
-	    
+	    if json
+		request.body = JSON.generate(json)
+		request['Content-Type'] = 'application/json'
+	    else
+		boundary = "AaB03x"
+		post_body = []
+		post_body << "--#{boundary}\r\n"
+		post_body << "Content-Disposition: form-data; name=\"file\"; filename=\"#{File.basename(file)}\"\r\n"
+		post_body << "Content-Type: text/plain\r\n"
+		post_body << "\r\n"
+		post_body << File.read(file)
+		post_body << "\r\n--#{boundary}--\r\n"
+		request.body = post_body.join
+		request['Content-Type'] = "multipart/form-data; boundary=#{boundary}"
+	    end
+
 	    if (uri.scheme == 'https')
 		http.use_ssl = true
-		http.verify_mode = OpenSSL::SSL::VERIFY_NONE
+		http.verify_mode = json ? OpenSSL::SSL::VERIFY_PEER : OpenSSL::SSL::VERIFY_NONE
 	    end
 
 	    return http.request(request)

@@ -4,8 +4,8 @@ require 'tmpdir'
 class TestBrowshot < Test::Unit::TestCase
   context 'Browshot client' do
     should 'report the API version' do
-      assert_equal '1.32', Browshot.new.api_version
-      assert_equal '1.32.0', Browshot::VERSION
+      assert_equal '2.0', Browshot.new.api_version
+      assert_equal '2.0.0', Browshot::VERSION
     end
   end
 

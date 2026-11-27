@@ -1,5 +1,10 @@
 = Changelog
 
+== 2.0.0
+
+* Select API v1 for legacy parameters and API v2 for shared endpoints and new capture options.
+* Support synchronous v2 captures, device discovery, and app management.
+
 == 1.32.0
 
 * Add +screenshot_pdf+, +screenshot_pdf_file+, +screenshot_video+, and

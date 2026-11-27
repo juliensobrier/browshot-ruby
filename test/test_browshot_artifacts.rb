@@ -5,6 +5,7 @@ require 'webrick'
 class TestBrowshotArtifacts < Test::Unit::TestCase
   FIXTURE_ID = '9007199254740991'
   TEST_KEY = 'test key & value'
+  PNG = "\x89PNG\r\n\x1a\n\xff".b
   ARTIFACTS = {
     'pdf' => ['application/pdf', "%PDF-1.7\n\x00\x80\xff".b],
     'webm' => ['video/webm', "\x1a\x45\xdf\xa3\x00\x80\xff".b],
@@ -122,13 +123,94 @@ class TestBrowshotArtifacts < Test::Unit::TestCase
         assert_equal url + "\n", batch['file']
       end
     end
+    should 'route v1 capture arguments and v2 shared screenshot info' do
+      client = automatic_client
+      legacy = client.screenshot_create('https://example.com', :instance_id => 373)
+      assert_equal '/api/v1/screenshot/create', legacy['path']
+      shared = client.screenshot_info(123)
+      assert_equal '/api/v2/screenshot/info', shared['path']
+      assert_false shared['query'].key?('details')
+      assert_equal '/api/v1/screenshot/info', client.screenshot_info(123, :details => 0)['path']
+      forced = client.screenshot_info(123, :api_version => 1)
+      assert_equal '/api/v1/screenshot/info', forced['path']
+      assert_false forced['query'].key?('api_version')
+      assert_equal '/api/v1/screenshot/info', client.screenshot_info(123, :stub_offline => 1)['path']
+      assert_equal 'Page not found', client.screenshot_info(123, :stub_offline => 1, :api_version => 2)['message']
+      assert_equal 'test', client.screenshot_info(123, :stub_status => 404)['error']
+    end
+
+    should 'use v2 for bulk requests, device discovery, and app management' do
+      client = automatic_client
+      urls = ['https://example.com/', 'https://example.net/']
+      profiles = [{ 'browser' => 'firefox', 'country' => 'fr' }, { 'device' => 'iphone_15_pro' }]
+      result = client.screenshot_multiple(:urls => urls, :profiles => profiles, :apps => { 'uploads' => 'shot.png' })
+      assert_equal '/api/v2/screenshot/multiple', result['path']
+      assert_equal urls, result['query']['url']
+      assert_equal profiles, JSON.parse(result['query']['profiles'].first)
+      assert_equal ['shot.png'], result['query']['apps[uploads]']
+      crawl = client.crawl_create('example.com', :country => 'fr')
+      assert_equal '/api/v2/crawl/create', crawl['path']
+      assert_false crawl['query'].key?('url')
+      Dir.mktmpdir do |directory|
+        path = File.join(directory, 'urls.txt')
+        File.write(path, urls.join("\n"))
+        batch = client.batch_create(path, :country => 'fr')
+        assert_equal '/api/v2/batch/create', batch['path']
+        assert_equal urls.join("\n"), batch['file']
+      end
+      assert_equal '/api/v2/device/list', client.device_list['path']
+      assert_equal '/api/v2/app/list', client.app_list['path']
+      assert_equal ['37'], client.app_info(37)['query']['id']
+      create = client.app_create(:type => 'webhook', :app_id => 'notify', :name => 'Notifications',
+                                 :config => { :url => 'https://example.com/capture-events' })
+      assert_equal '/api/v2/app/create', create['path']
+      assert_equal 'POST', create['method']
+      assert_equal 'https://example.com/capture-events', create['json']['config']['url']
+      assert_equal({ 'id' => 37, 'isActive' => false }, client.app_update('37', :isActive => 0)['json'])
+      assert_equal({ 'id' => 37 }, client.app_delete(37)['json'])
+      assert_equal '/api/v2/app/test', client.app_test(37)['path']
+      assert_equal({ 'screenshot_id' => 123, 'apps' => ['uploads'] }, client.app_run('123', ['uploads'])['json'])
+    end
+
+    should 'use the v2 wait redirects for synchronous image downloads' do
+      client = automatic_client
+      options = { :url => 'https://example.com/', :country => 'fr' }
+      assert_equal({ :code => '200', :png => PNG }, client.simple(options))
+      Dir.mktmpdir do |directory|
+        path = File.join(directory, 'capture.png')
+        assert_equal({ :code => '200', :file => path }, client.simple_file(path, options))
+        assert_equal PNG, File.binread(path)
+      end
+    end
   end
 
   private
 
+  def automatic_client
+    client = Browshot.new(TEST_KEY)
+    client.instance_variable_set(:@base, @browshot.base.sub('/v1/', '/v2/'))
+    client
+  end
+
   def fixture_response(request, response)
     query = URI.decode_www_form(request.query_string.to_s).group_by(&:first)
     query = query.transform_values { |pairs| pairs.map(&:last) }
+    if request.path.start_with?('/api/v2/') && query['stub_offline']
+      response.status = 404
+      response['Content-Type'] = 'application/json'
+      response.body = '{"success":false,"error":"NOT_FOUND","message":"Page not found"}'
+      return
+    end
+    if request.path == '/api/v2/simple' || request.path == '/api/v2/wait'
+      response.status = 302
+      response['Location'] = request.path.end_with?('/simple') ? '/api/v2/wait' : 'simple/123'
+      return
+    end
+    if request.path == '/api/v2/simple/123'
+      response['Content-Type'] = 'image/png'
+      response.body = PNG
+      return
+    end
     if query['stub_status']
       response.status = query['stub_status'].first.to_i
       response['Content-Type'] = 'application/json'
@@ -155,9 +237,11 @@ class TestBrowshotArtifacts < Test::Unit::TestCase
       response.body = body
     else
       response['Content-Type'] = 'application/json'
+      json = request['Content-Type'] == 'application/json'
       response.body = JSON.generate(
-        'path' => request.path, 'query' => query,
-        'method' => request.request_method, 'file' => request.query['file']
+        'path' => request.path, 'query' => query, 'method' => request.request_method,
+        'file' => json ? nil : request.query['file'],
+        'json' => json ? JSON.parse(request.body) : nil
       )
     end
   end
